@@ -26,14 +26,23 @@ class DVChart: UIViewController {
     var chartFrame: CGRect!
     weak var target: UIViewController!
     
-    var data: [String: Int] = [
-        "1996" : 5,
-        "1997" : 6,
-        "1998" : 4,
-        "1999" : 7,
-        "2000" : 3,
-        "2001" : 2
-    ]
+    var data: [String: Int]? {
+        didSet {
+            switch self.chartType {
+            case .PieChart:
+                if self.pieChart != nil { self.pieChart!.data = self.data }
+                break
+            case .BarChart:
+                if self.barChart != nil { self.barChart!.data = self.data }
+                break
+            case .LineChart:
+                if self.lineChart != nil { self.lineChart!.data = self.data }
+                break
+            }
+        }
+    }
+    
+    var colorTable: [UIColor]?
     
     // MARK: - Init Methods
     
@@ -45,20 +54,20 @@ class DVChart: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    init(target: UIViewController,frame: CGRect) {
+    init(target: UIViewController,frame: CGRect, data: [String: Int]) {
         super.init(nibName: nil, bundle: nil)
         self.target = target
         self.chartFrame = frame
-        
+        self.data = data
         setupChart()
     }
     
-    init(target: UIViewController, frame: CGRect, type: ChartType) {
+    init(target: UIViewController, frame: CGRect, type: ChartType, data: [String: Int]) {
         super.init(nibName: nil, bundle: nil)
         self.target = target
         self.chartFrame = frame
         self.chartType = type
-        
+        self.data = data
         setupChart()
     }
 
@@ -80,16 +89,13 @@ class DVChart: UIViewController {
     func setupChart() {
         switch chartType {
         case .PieChart:
-            pieChart = PieChart(frame: chartFrame, data: data)
+            pieChart = PieChart(frame: chartFrame, data: data!)
             break
         case .BarChart:
             barChart = BarChart(frame: chartFrame)
             break
         case.LineChart:
             lineChart = LineChart(frame: chartFrame)
-            break
-        default:
-            print("Printed something...")
             break
         }
     }
@@ -110,33 +116,36 @@ class DVChart: UIViewController {
             if lineChart == nil { return }
             target.view.addSubview(lineChart!)
             break
-        default:
-            print("Printed something...")
-            break
         }
     }
 }
 
 class PieChart: UIView {
     
-    var data: [String:Int]?
-    let arcWidth: CGFloat = 100.0
+    var data: [String:Int]? {
+        didSet { setNeedsDisplay() }
+    }
+    var arcWidth: CGFloat = 130
     let pi: CGFloat = CGFloat(M_PI)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = UIColor.clearColor()
-        
+        setupArcWidth()
     }
     
     init(frame: CGRect, data: [String:Int]) {
         super.init(frame: frame)
+        setupArcWidth()
         self.data = data
-        setNeedsDisplay()
     }
 
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setupArcWidth() {
+        arcWidth = min(bounds.width, bounds.height)/2 - min(bounds.width, bounds.height)/12
     }
     
     override func drawRect(rect: CGRect) {
@@ -176,7 +185,7 @@ class PieChart: UIView {
         var startSubAngle = startAngle
         var endSubAngle = startAngle
         
-        for value in valueArray {
+        for (key,value) in data! {
             startSubAngle = endSubAngle
             endSubAngle = startSubAngle + subAngle * CGFloat(value)
             
@@ -184,17 +193,39 @@ class PieChart: UIView {
             subPath.lineWidth = arcWidth
             UIColor.randomColor().setStroke()
             subPath.stroke()
+            
+//            let labelAngle = (endSubAngle - startSubAngle)/2 + startSubAngle - (2 * pi)
+            
+            let firstPoint = self.center
+            
+            let firstLabelAngle = startSubAngle - (2 * pi)
+            let secondLabelAngle = endSubAngle - (2 * pi)
+            
+            let secondX = (cos(firstLabelAngle) * min(bounds.width, bounds.height)/2) + min(bounds.width, bounds.height)/2
+            let secondY = min(bounds.width, bounds.height)/2 + (sin(firstLabelAngle) * min(bounds.width, bounds.height)/2)
+            let secondPoint = CGPoint(x: secondX, y: secondY)
+        
+            
+            print("\(secondX) - \(secondY)")
         }
     }
 }
 
 class BarChart: UIView {
+    var data: [String:Int]? {
+        didSet { setNeedsDisplay() }
+    }
+
     override func drawRect(rect: CGRect) {
         
     }
 }
 
 class LineChart: UIView {
+    var data: [String:Int]? {
+        didSet { setNeedsDisplay() }
+    }
+
     override func drawRect(rect: CGRect) {
         
     }
