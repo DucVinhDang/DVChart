@@ -205,8 +205,22 @@ class PieChart: UIView {
             let secondY = min(bounds.width, bounds.height)/2 + (sin(firstLabelAngle) * min(bounds.width, bounds.height)/2)
             let secondPoint = CGPoint(x: secondX, y: secondY)
         
+            let thirdX = (cos(secondLabelAngle) * min(bounds.width, bounds.height)/2) + min(bounds.width, bounds.height)/2
+            let thirdY = min(bounds.width, bounds.height)/2 + (sin(secondLabelAngle) * min(bounds.width, bounds.height)/2)
+            let thirdPoint = CGPoint(x: thirdX, y: thirdY)
             
-            print("\(secondX) - \(secondY)")
+            let labelCenterX = (firstPoint.x + secondPoint.x + thirdPoint.x) / 3
+            let labelCenterY = (firstPoint.y + secondPoint.y + thirdPoint.y) / 3
+        
+            let labelCenter = CGPoint(x: labelCenterX, y: labelCenterY)
+            
+            let label = UILabel(frame: CGRect(x: 0, y: 0, width: 50, height: 15))
+            label.center = labelCenter
+            label.backgroundColor = UIColor.randomColor()
+            label.text = key
+            label.font = UIFont(name: "Apple SD Gothic Neo", size: 12)
+            label.textAlignment = NSTextAlignment.Center
+            self.addSubview(label)
         }
     }
 }
