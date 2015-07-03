@@ -3,6 +3,11 @@
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8101.16"/>
     </dependencies>
+    <customFonts key="customFonts">
+        <mutableArray key="AppleSDGothicNeo.ttc">
+            <string>AppleSDGothicNeo-UltraLight</string>
+        </mutableArray>
+    </customFonts>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ViewController" customModule="DVChart" customModuleProvider="target">
             <connections>
@@ -13,8 +18,30 @@
         <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
             <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kvq-66-LDg">
+                    <rect key="frame" x="8" y="537" width="584" height="55"/>
+                    <animations/>
+                    <color key="backgroundColor" red="0.26855150933574962" green="0.48573971499326063" blue="0.83597840310000004" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="55" id="odh-24-tbY"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" name="AppleSDGothicNeo-UltraLight" family="Apple SD Gothic Neo" pointSize="23"/>
+                    <state key="normal" title="Touch to update chart">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="touchAction:" destination="-1" eventType="touchUpInside" id="NCH-7V-gb2"/>
+                    </connections>
+                </button>
+            </subviews>
             <animations/>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="kvq-66-LDg" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="8" id="m4s-yr-39d"/>
+                <constraint firstAttribute="bottom" secondItem="kvq-66-LDg" secondAttribute="bottom" constant="8" id="qOW-Nw-6Qh"/>
+                <constraint firstAttribute="trailing" secondItem="kvq-66-LDg" secondAttribute="trailing" constant="8" id="sdS-0p-aYl"/>
+            </constraints>
         </view>
     </objects>
 </document>

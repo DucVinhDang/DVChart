@@ -22,6 +22,7 @@ class DVChart: UIViewController {
     var barChart: BarChart?
     var lineChart: LineChart?
     var chartType: ChartType = ChartType.PieChart
+    weak var currentChart: UIView!
     
     var chartFrame: CGRect!
     weak var target: UIViewController!
@@ -46,14 +47,6 @@ class DVChart: UIViewController {
     
     // MARK: - Init Methods
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
-        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-    }
-    
-    required init(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     init(target: UIViewController,frame: CGRect, data: [String: Int]) {
         super.init(nibName: nil, bundle: nil)
         self.target = target
@@ -68,7 +61,13 @@ class DVChart: UIViewController {
         self.chartFrame = frame
         self.chartType = type
         self.data = data
+        
+        setupMainView()
         setupChart()
+    }
+
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     // MARK: - View States Methods
@@ -86,16 +85,24 @@ class DVChart: UIViewController {
     
     // MARK: - Set Up Chart
     
-    func setupChart() {
+    private func setupMainView() {
+        self.view.frame = chartFrame
+        self.view.backgroundColor = UIColor.clearColor()
+    }
+    
+    private func setupChart() {
         switch chartType {
         case .PieChart:
-            pieChart = PieChart(frame: chartFrame, data: data!)
+            pieChart = PieChart(frame: CGRect(x: 0, y: 0, width: chartFrame.width, height: chartFrame.height), data: data!)
+            currentChart = pieChart
             break
         case .BarChart:
             barChart = BarChart(frame: chartFrame)
+            currentChart = barChart
             break
         case.LineChart:
             lineChart = LineChart(frame: chartFrame)
+            currentChart = lineChart
             break
         }
     }
@@ -103,20 +110,25 @@ class DVChart: UIViewController {
     // MARK: - Chart Animations
     
     func show() {
-        switch chartType {
-        case .PieChart:
-            if pieChart == nil { return }
-            target.view.addSubview(pieChart!)
-            break
-        case .BarChart:
-            if barChart == nil { return }
-            target.view.addSubview(barChart!)
-            break
-        case.LineChart:
-            if lineChart == nil { return }
-            target.view.addSubview(lineChart!)
-            break
+        if currentChart == nil { return }
+        showChart(currentChart)
+    }
+    
+    private func showChart(chart: UIView) {
+        if chart.superview == nil {
+            print(self.view.frame)
+            view.addSubview(currentChart)
+            target.addChildViewController(self)
+            target.view.addSubview(view)
+            self.didMoveToParentViewController(target)
+        } else {
+            if chart.hidden { chart.hidden = false }
         }
+    }
+    
+    func hide() {
+        if currentChart == nil { return }
+        currentChart.hidden = true
     }
 }
 
@@ -125,6 +137,9 @@ class PieChart: UIView {
     var data: [String:Int]? {
         didSet { setNeedsDisplay() }
     }
+    
+    var labelArray = [UILabel]()
+    
     var arcWidth: CGFloat = 130
     let pi: CGFloat = CGFloat(M_PI)
     
@@ -143,9 +158,10 @@ class PieChart: UIView {
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     func setupArcWidth() {
-        arcWidth = min(bounds.width, bounds.height)/2 - min(bounds.width, bounds.height)/12
+//        arcWidth = min(bounds.width, bounds.height)/2 - min(bounds.width, bounds.height)/11
+        arcWidth = min(bounds.width, bounds.height)/2
     }
     
     override func drawRect(rect: CGRect) {
@@ -165,12 +181,16 @@ class PieChart: UIView {
         let endPoint = CGPoint(x:0, y:self.bounds.height)
         CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
         
+//        let context = UIGraphicsGetCurrentContext()
+//        CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
+//        CGContextFillRect(context, rect)
+        
         let center = self.center
-        let radius = max(self.bounds.width, self.bounds.height)/2 - arcWidth/2
+        let radius = min(self.bounds.width, self.bounds.height)/2 - arcWidth/2
 
         
         let startAngle = 3 * pi / 2
-        let endAngle = 7 * pi / 2
+//        let endAngle = 7 * pi / 2
         
         var amount = 0
         var valueArray = [Int]()
@@ -185,6 +205,13 @@ class PieChart: UIView {
         var startSubAngle = startAngle
         var endSubAngle = startAngle
         
+        if labelArray.count != 0 {
+            for label in labelArray {
+                label.removeFromSuperview()
+            }
+            labelArray.removeAll()
+        }
+        
         for (key,value) in data! {
             startSubAngle = endSubAngle
             endSubAngle = startSubAngle + subAngle * CGFloat(value)
@@ -193,35 +220,48 @@ class PieChart: UIView {
             subPath.lineWidth = arcWidth
             UIColor.randomColor().setStroke()
             subPath.stroke()
-            
-//            let labelAngle = (endSubAngle - startSubAngle)/2 + startSubAngle - (2 * pi)
-            
-            let firstPoint = self.center
-            
-            let firstLabelAngle = startSubAngle - (2 * pi)
-            let secondLabelAngle = endSubAngle - (2 * pi)
-            
-            let secondX = (cos(firstLabelAngle) * min(bounds.width, bounds.height)/2) + min(bounds.width, bounds.height)/2
-            let secondY = min(bounds.width, bounds.height)/2 + (sin(firstLabelAngle) * min(bounds.width, bounds.height)/2)
-            let secondPoint = CGPoint(x: secondX, y: secondY)
-        
-            let thirdX = (cos(secondLabelAngle) * min(bounds.width, bounds.height)/2) + min(bounds.width, bounds.height)/2
-            let thirdY = min(bounds.width, bounds.height)/2 + (sin(secondLabelAngle) * min(bounds.width, bounds.height)/2)
-            let thirdPoint = CGPoint(x: thirdX, y: thirdY)
-            
-            let labelCenterX = (firstPoint.x + secondPoint.x + thirdPoint.x) / 3
-            let labelCenterY = (firstPoint.y + secondPoint.y + thirdPoint.y) / 3
-        
-            let labelCenter = CGPoint(x: labelCenterX, y: labelCenterY)
-            
-            let label = UILabel(frame: CGRect(x: 0, y: 0, width: 50, height: 15))
-            label.center = labelCenter
-            label.backgroundColor = UIColor.randomColor()
-            label.text = key
-            label.font = UIFont(name: "Apple SD Gothic Neo", size: 12)
-            label.textAlignment = NSTextAlignment.Center
-            self.addSubview(label)
+
+            addLabelToChartPiece("\(key): \(String(value))%", startAngle: startSubAngle, endAngle: endSubAngle)
         }
+    }
+    
+    func addLabelToChartPiece(text: String, startAngle: CGFloat, endAngle: CGFloat) {
+        let firstPoint = self.center
+        
+        let firstLabelAngle = startAngle - (2 * pi)
+        let secondLabelAngle = endAngle - (2 * pi)
+        
+        let chartCircleRad: CGFloat = min(bounds.width, bounds.height)/2
+        
+        let secondX = (cos(firstLabelAngle) * chartCircleRad) + chartCircleRad
+        let secondY = chartCircleRad + (sin(firstLabelAngle) * chartCircleRad)
+        let secondPoint = CGPoint(x: secondX, y: secondY)
+        
+        let thirdX = (cos(secondLabelAngle) * chartCircleRad) + chartCircleRad
+        let thirdY = chartCircleRad + (sin(secondLabelAngle) * chartCircleRad)
+        let thirdPoint = CGPoint(x: thirdX, y: thirdY)
+        
+        let labelCenterX = (firstPoint.x + secondPoint.x + thirdPoint.x) / 3
+        let labelCenterY = (firstPoint.y + secondPoint.y + thirdPoint.y) / 3
+        
+        let labelCenter = CGPoint(x: labelCenterX, y: labelCenterY)
+        
+        let myText: NSString = text as NSString
+        let textSize: CGSize = myText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(12)])
+        
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: textSize.width, height: textSize.height))
+        label.center = labelCenter
+        label.backgroundColor = UIColor.randomColor()
+        label.layer.borderWidth = 1
+        label.layer.borderColor = UIColor.blackColor().CGColor
+        label.layer.shadowOpacity = 0.2
+        label.text = text
+        label.font = UIFont(name: "Apple SD Gothic Neo", size: 11)
+        label.textAlignment = NSTextAlignment.Center
+        
+        labelArray.append(label)
+        
+        self.addSubview(label)
     }
 }
 
