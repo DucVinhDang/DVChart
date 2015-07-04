@@ -11,14 +11,13 @@ import UIKit
 class ViewController: UIViewController {
     
     var data: [String: Int] = [
-        "1996" : 12,
-        "1997" : 30,
-        "1998" : 25,
-        "1999" : 10,
-        "2000" : 23,
-        "2001" : 14,
-        "2002" : 24,
-        "2003" : 8
+        "Rất tồi" : 12,
+        "Tồi" : 30,
+        "Hơi tệ" : 25,
+        "Bình thường" : 10,
+        "Khá tốt" : 23,
+        "Tốt" : 14,
+        "Rất tốt" : 24
     ]
     
     weak var chart: DVChart?
@@ -36,11 +35,15 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 300), type: .PieChart, data: data)
+//        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 300), type: .PieChart, data: data)
+//        myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
+//        myChart.show()
+//        chart = myChart
+        
+        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .BarChart, data: data)
         myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
         myChart.show()
         chart = myChart
-        // Do any additional setup after loading the view.
         
     }
 

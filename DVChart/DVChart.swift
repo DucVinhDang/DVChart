@@ -91,14 +91,14 @@ class DVChart: UIViewController {
         self.view.frame = chartFrame
         self.view.translatesAutoresizingMaskIntoConstraints = false
         self.view.autoresizingMask = UIViewAutoresizing.FlexibleHeight
-        self.view.backgroundColor = UIColor.blueColor()
+        self.view.backgroundColor = UIColor.clearColor()
     }
     
     private func setupChart() {
+        let chartSize = min(chartFrame.width, chartFrame.height)
+        let viewSize = max(chartFrame.width, chartFrame.height)
         switch chartType {
         case .PieChart:
-            let chartSize = min(chartFrame.width, chartFrame.height)
-            let viewSize = max(chartFrame.width, chartFrame.height)
             pieChart = PieChart(frame: CGRect(x: 0, y: 0, width: chartSize, height: chartSize), data: data!)
             pieChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
             view.addSubview(pieChart!)
@@ -108,7 +108,14 @@ class DVChart: UIViewController {
             currentChart = pieChart
             break
         case .BarChart:
-            barChart = BarChart(frame: chartFrame)
+            barChart = BarChart(frame: CGRect(x: 0, y: 0, width: chartSize, height: chartSize), data: data!)
+            barChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
+            view.addSubview(barChart!)
+            target.addChildViewController(self)
+            target.view.addSubview(self.view)
+            self.didMoveToParentViewController(target)
+            currentChart = barChart
+
             currentChart = barChart
             break
         case.LineChart:
@@ -195,12 +202,8 @@ class PieChart: UIView {
 //        let endAngle = 7 * pi / 2
         
         var amount = 0
-        var valueArray = [Int]()
-        for object in data!.values {
-            amount += object
-            valueArray.append(object)
-        }
-        
+        for object in data!.values { amount += object }
+ 
         let bigAngle = 2 * pi
         let subAngle = bigAngle / CGFloat(amount)
         
@@ -249,7 +252,7 @@ class PieChart: UIView {
         let labelCenter = CGPoint(x: labelCenterX, y: labelCenterY)
         
         let myText: NSString = text as NSString
-        let textSize: CGSize = myText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(12)])
+        let textSize: CGSize = myText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(13)])
         
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: textSize.width, height: textSize.height))
         label.center = labelCenter
@@ -258,7 +261,7 @@ class PieChart: UIView {
         label.layer.borderColor = UIColor.blackColor().CGColor
         label.layer.shadowOpacity = 0.2
         label.text = text
-        label.font = UIFont(name: "Apple SD Gothic Neo", size: 11)
+        label.font = UIFont(name: "Helvetica", size: 11)
         label.textAlignment = NSTextAlignment.Center
         
         labelArray.append(label)
@@ -271,9 +274,108 @@ class BarChart: UIView {
     var data: [String:Int]? {
         didSet { setNeedsDisplay() }
     }
+    
+    var verticalAxisLabels: [UILabel]?
+    var horizontalAxisLabels: [UILabel]?
+    var margin: CGFloat = 10
+    let distanceBetweenColumns = 10
+    let axesLineWidth: CGFloat = 2
+    
+    let axesColor = UIColor.blackColor()
+    let columnColor = UIColor.randomColor()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setMarginForChart()
+        self.backgroundColor = UIColor.clearColor()
+    }
+    
+    init(frame: CGRect, data: [String:Int]) {
+        super.init(frame: frame)
+        setMarginForChart()
+        self.backgroundColor = UIColor.clearColor()
+        self.data = data
+    }
+
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setMarginForChart() {
+        margin = self.bounds.width/12
+    }
 
     override func drawRect(rect: CGRect) {
+        let context = UIGraphicsGetCurrentContext()
+        let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
         
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let colorLocations:[CGFloat] = [0.0, 1.0]
+        let gradient = CGGradientCreateWithColors(colorSpace,
+            colors,
+            colorLocations)
+        let startPoint = CGPoint.zeroPoint
+        let endPoint = CGPoint(x:0, y:self.bounds.height)
+        CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
+        
+        // Let's begin !!!
+        
+        // Step 1: Drawing columns of chart
+        
+        for i in 0..<data!.count {
+            let originPosition = getOriginPositionOfColumn(i)
+            let horizontalY = self.bounds.height - margin
+            let columnWidth = getColumnWidth()
+            
+            let columnPath = UIBezierPath()
+            columnPath.moveToPoint(CGPoint(x: originPosition.x, y: horizontalY))
+            columnPath.addLineToPoint(CGPoint(x: originPosition.x, y: originPosition.y))
+            columnPath.addLineToPoint(CGPoint(x: originPosition.x + columnWidth, y: originPosition.y))
+            columnPath.addLineToPoint(CGPoint(x: originPosition.x + columnWidth, y: horizontalY))
+            columnPath.closePath()
+            
+            UIColor.randomColor().setFill()
+            columnPath.fill()
+        }
+        
+        // Step 2: Drawing axes of chart
+        
+        let axesPath = UIBezierPath()
+        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
+        axesPath.addLineToPoint(CGPoint(x: margin, y: self.bounds.height-margin))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
+        
+        axesPath.lineWidth = axesLineWidth
+        axesColor.setStroke()
+        axesPath.stroke()
+        axesPath.closePath()
+    }
+    
+    func getOriginPositionOfColumn(index: Int) -> CGPoint {
+        let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
+        let columnValue = getTheColumnValue(column: index)
+        let columnWidth = getColumnWidth()
+        let chartHeight = self.bounds.height - (2 * margin)
+        
+        let posX = margin + CGFloat((distanceBetweenColumns * (index + 1))) + (columnWidth * CGFloat(index))
+        let posY = margin + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
+        return CGPoint(x: posX, y: posY)
+    }
+    
+    func getColumnWidth() -> CGFloat {
+        let dataCount = data!.count
+        let chartWidth = self.bounds.width - (2 * margin)
+        return (chartWidth - CGFloat((distanceBetweenColumns * (dataCount+1)))) / CGFloat(dataCount)
+    }
+    
+    func getTheColumnValue(column column: Int) -> Int {
+        return data!.values.array[column]
+    }
+    
+    func getTheTotalAmountOfData() -> Int {
+        var amount = 0
+        for object in data!.values { amount += object }
+        return amount
     }
 }
 
