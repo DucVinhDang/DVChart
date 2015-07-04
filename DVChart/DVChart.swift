@@ -96,7 +96,6 @@ class DVChart: UIViewController {
     
     private func setupChart() {
         let chartSize = min(chartFrame.width, chartFrame.height)
-        let viewSize = max(chartFrame.width, chartFrame.height)
         switch chartType {
         case .PieChart:
             pieChart = PieChart(frame: CGRect(x: 0, y: 0, width: chartSize, height: chartSize), data: data!)
@@ -280,6 +279,8 @@ class BarChart: UIView {
     var margin: CGFloat = 10
     let distanceBetweenColumns = 10
     let axesLineWidth: CGFloat = 2
+    let arrowAxesSizeX: CGFloat = 3
+    let arrowAxesSizeY: CGFloat = 3
     
     let axesColor = UIColor.blackColor()
     let columnColor = UIColor.randomColor()
@@ -342,8 +343,18 @@ class BarChart: UIView {
         
         let axesPath = UIBezierPath()
         axesPath.moveToPoint(CGPoint(x: margin, y: margin))
+        axesPath.addLineToPoint(CGPoint(x: margin-arrowAxesSizeX, y: margin+arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
+        axesPath.addLineToPoint(CGPoint(x: margin+arrowAxesSizeX, y: margin+arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
+        
         axesPath.addLineToPoint(CGPoint(x: margin, y: self.bounds.height-margin))
         axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
+        
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin+arrowAxesSizeY))
+        
         
         axesPath.lineWidth = axesLineWidth
         axesColor.setStroke()
