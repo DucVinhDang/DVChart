@@ -36,7 +36,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: 360, height: 340), type: .PieChart, data: data)
+        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 300), type: .PieChart, data: data)
         myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
         myChart.show()
         chart = myChart

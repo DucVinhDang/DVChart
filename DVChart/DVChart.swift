@@ -52,6 +52,8 @@ class DVChart: UIViewController {
         self.target = target
         self.chartFrame = frame
         self.data = data
+        
+        setupMainView()
         setupChart()
     }
     
@@ -87,13 +89,22 @@ class DVChart: UIViewController {
     
     private func setupMainView() {
         self.view.frame = chartFrame
-        self.view.backgroundColor = UIColor.clearColor()
+        self.view.translatesAutoresizingMaskIntoConstraints = false
+        self.view.autoresizingMask = UIViewAutoresizing.FlexibleHeight
+        self.view.backgroundColor = UIColor.blueColor()
     }
     
     private func setupChart() {
         switch chartType {
         case .PieChart:
-            pieChart = PieChart(frame: CGRect(x: 0, y: 0, width: chartFrame.width, height: chartFrame.height), data: data!)
+            let chartSize = min(chartFrame.width, chartFrame.height)
+            let viewSize = max(chartFrame.width, chartFrame.height)
+            pieChart = PieChart(frame: CGRect(x: 0, y: 0, width: chartSize, height: chartSize), data: data!)
+            pieChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
+            view.addSubview(pieChart!)
+            target.addChildViewController(self)
+            target.view.addSubview(self.view)
+            self.didMoveToParentViewController(target)
             currentChart = pieChart
             break
         case .BarChart:
@@ -112,18 +123,11 @@ class DVChart: UIViewController {
     func show() {
         if currentChart == nil { return }
         showChart(currentChart)
+        currentChart.setNeedsDisplay()
     }
     
     private func showChart(chart: UIView) {
-        if chart.superview == nil {
-            print(self.view.frame)
-            view.addSubview(currentChart)
-            target.addChildViewController(self)
-            target.view.addSubview(view)
-            self.didMoveToParentViewController(target)
-        } else {
-            if chart.hidden { chart.hidden = false }
-        }
+        if chart.hidden { chart.hidden = false }
     }
     
     func hide() {
@@ -139,7 +143,6 @@ class PieChart: UIView {
     }
     
     var labelArray = [UILabel]()
-    
     var arcWidth: CGFloat = 130
     let pi: CGFloat = CGFloat(M_PI)
     
@@ -185,9 +188,8 @@ class PieChart: UIView {
 //        CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
 //        CGContextFillRect(context, rect)
         
-        let center = self.center
+        let center = CGPoint(x: self.frame.width/2, y: self.frame.height/2)
         let radius = min(self.bounds.width, self.bounds.height)/2 - arcWidth/2
-
         
         let startAngle = 3 * pi / 2
 //        let endAngle = 7 * pi / 2
@@ -226,12 +228,12 @@ class PieChart: UIView {
     }
     
     func addLabelToChartPiece(text: String, startAngle: CGFloat, endAngle: CGFloat) {
-        let firstPoint = self.center
+        let firstPoint = CGPoint(x: self.frame.width/2, y: self.frame.height/2)
         
         let firstLabelAngle = startAngle - (2 * pi)
         let secondLabelAngle = endAngle - (2 * pi)
         
-        let chartCircleRad: CGFloat = min(bounds.width, bounds.height)/2
+        let chartCircleRad: CGFloat = self.frame.width/2
         
         let secondX = (cos(firstLabelAngle) * chartCircleRad) + chartCircleRad
         let secondY = chartCircleRad + (sin(firstLabelAngle) * chartCircleRad)
@@ -252,7 +254,7 @@ class PieChart: UIView {
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: textSize.width, height: textSize.height))
         label.center = labelCenter
         label.backgroundColor = UIColor.randomColor()
-        label.layer.borderWidth = 1
+        label.layer.borderWidth = 0
         label.layer.borderColor = UIColor.blackColor().CGColor
         label.layer.shadowOpacity = 0.2
         label.text = text
