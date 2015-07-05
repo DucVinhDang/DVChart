@@ -40,11 +40,15 @@ class ViewController: UIViewController {
 //        myChart.show()
 //        chart = myChart
         
-        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .BarChart, data: data)
+//        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .BarChart, data: data)
+//        myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
+//        myChart.show()
+//        chart = myChart
+        
+        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .LineChart, data: data)
         myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
         myChart.show()
         chart = myChart
-        
     }
 
     override func didReceiveMemoryWarning() {

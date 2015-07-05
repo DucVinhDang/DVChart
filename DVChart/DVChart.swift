@@ -114,11 +114,14 @@ class DVChart: UIViewController {
             target.view.addSubview(self.view)
             self.didMoveToParentViewController(target)
             currentChart = barChart
-
-            currentChart = barChart
             break
         case.LineChart:
-            lineChart = LineChart(frame: chartFrame)
+            lineChart = LineChart(frame: CGRect(x: 0, y: 0, width: chartSize, height: chartSize), data: data!)
+            lineChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
+            view.addSubview(lineChart!)
+            target.addChildViewController(self)
+            target.view.addSubview(self.view)
+            self.didMoveToParentViewController(target)
             currentChart = lineChart
             break
         }
@@ -303,7 +306,7 @@ class BarChart: UIView {
     }
     
     func setMarginForChart() {
-        margin = self.bounds.width/12
+        margin = self.bounds.width/15
     }
 
     override func drawRect(rect: CGRect) {
@@ -321,23 +324,25 @@ class BarChart: UIView {
         
         // Let's begin !!!
         
+        print(data!)
+        
         // Step 1: Drawing columns of chart
+        
+        let horizontalY = self.bounds.height - margin
+        let columnWidth = getColumnWidth()
+        let columnPath = UIBezierPath()
         
         for i in 0..<data!.count {
             let originPosition = getOriginPositionOfColumn(i)
-            let horizontalY = self.bounds.height - margin
-            let columnWidth = getColumnWidth()
-            
-            let columnPath = UIBezierPath()
             columnPath.moveToPoint(CGPoint(x: originPosition.x, y: horizontalY))
             columnPath.addLineToPoint(CGPoint(x: originPosition.x, y: originPosition.y))
             columnPath.addLineToPoint(CGPoint(x: originPosition.x + columnWidth, y: originPosition.y))
             columnPath.addLineToPoint(CGPoint(x: originPosition.x + columnWidth, y: horizontalY))
-            columnPath.closePath()
-            
-            UIColor.randomColor().setFill()
-            columnPath.fill()
         }
+        
+        columnPath.closePath()
+        UIColor.randomColor().setFill()
+        columnPath.fill()
         
         // Step 2: Drawing axes of chart
         
@@ -394,9 +399,184 @@ class LineChart: UIView {
     var data: [String:Int]? {
         didSet { setNeedsDisplay() }
     }
-
+    
+    var margin: CGFloat = 10
+    let distanceBetweenColumns = 10
+    
+    var verticalAxisLabels: [UILabel]?
+    var horizontalAxisLabels: [UILabel]?
+    
+    let axesLineWidth: CGFloat = 2
+    let lineBetweenColumnsWidth: CGFloat = 2
+    let columnDashedSize = CGSize(width: 1, height: 6)
+    let distanceBetweenDashed: CGFloat = 4
+    let columnCircleRadius: CGFloat = 3
+    let arrowAxesSizeX: CGFloat = 3
+    let arrowAxesSizeY: CGFloat = 3
+    
+    let axesColor = UIColor.blackColor()
+    let columnColor = UIColor.randomColor()
+    let lineBetweenColumnsColor = UIColor.whiteColor()
+    let columnDashedColor = UIColor.whiteColor()
+    let columnCircleColor = UIColor.whiteColor()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setMarginForChart()
+        self.backgroundColor = UIColor.clearColor()
+    }
+    
+    init(frame: CGRect, data: [String:Int]) {
+        super.init(frame: frame)
+        setMarginForChart()
+        self.backgroundColor = UIColor.clearColor()
+        self.data = data
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setMarginForChart() {
+        margin = self.bounds.width/15
+    }
+    
     override func drawRect(rect: CGRect) {
+        let context = UIGraphicsGetCurrentContext()
+        let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
         
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let colorLocations:[CGFloat] = [0.0, 1.0]
+        let gradient = CGGradientCreateWithColors(colorSpace,
+            colors,
+            colorLocations)
+        let startPoint = CGPoint.zeroPoint
+        let endPoint = CGPoint(x:0, y:self.bounds.height)
+        CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
+        
+        // Let's begin !!!
+        
+        // Step 1: Drawing columns of chart
+        
+        let originPosition = getOriginPositionOfColumn(0)
+        let columnWidth = getColumnWidth()
+        
+        addCircleForColumnAtIndex(index: 0)
+        addDashedForColumnAtIndex(index: 0)
+        let columnPath = UIBezierPath()
+        columnPath.moveToPoint(CGPoint(x: originPosition.x + columnWidth/2, y: originPosition.y))
+        
+        for i in 0..<data!.count {
+            if i+1 < data!.count {
+                addCircleForColumnAtIndex(index: i+1)
+                addDashedForColumnAtIndex(index: i+1)
+                let nextColumPosition = getOriginPositionOfColumn(i+1)
+                let pointX = nextColumPosition.x + columnWidth/2
+                let pointY = nextColumPosition.y
+                columnPath.addLineToPoint(CGPoint(x: pointX, y: pointY))
+            }
+            
+        }
+        
+        columnPath.lineWidth = lineBetweenColumnsWidth
+        lineBetweenColumnsColor.setStroke()
+        columnPath.stroke()
+        
+        columnPath.closePath()
+        
+        // Step 2: Drawing axes of chart
+        
+        let axesPath = UIBezierPath()
+        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
+        axesPath.addLineToPoint(CGPoint(x: margin-arrowAxesSizeX, y: margin+arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
+        axesPath.addLineToPoint(CGPoint(x: margin+arrowAxesSizeX, y: margin+arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
+        
+        axesPath.addLineToPoint(CGPoint(x: margin, y: self.bounds.height-margin))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
+        
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin+arrowAxesSizeY))
+        
+        
+        axesPath.lineWidth = axesLineWidth
+        axesColor.setStroke()
+        axesPath.stroke()
+        axesPath.closePath()
+    }
+    
+    func getOriginPositionOfColumn(index: Int) -> CGPoint {
+        let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
+        let columnValue = getTheColumnValue(column: index)
+        let columnWidth = getColumnWidth()
+        let chartHeight = self.bounds.height - (2 * margin)
+        
+        let posX = margin + CGFloat((distanceBetweenColumns * (index + 1))) + (columnWidth * CGFloat(index))
+        let posY = margin + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
+        return CGPoint(x: posX, y: posY)
+    }
+    
+    func getColumnWidth() -> CGFloat {
+        let dataCount = data!.count
+        let chartWidth = self.bounds.width - (2 * margin)
+        return (chartWidth - CGFloat((distanceBetweenColumns * (dataCount+1)))) / CGFloat(dataCount)
+    }
+    
+    func getColumnHeightAtIndex(columnIndex columnIndex:Int) -> CGFloat {
+        let columnPosition = getOriginPositionOfColumn(columnIndex)
+        return self.bounds.height - columnPosition.y - margin
+    }
+    
+    func getTheColumnValue(column column: Int) -> Int {
+        return data!.values.array[column]
+    }
+    
+    func getTheTotalAmountOfData() -> Int {
+        var amount = 0
+        for object in data!.values { amount += object }
+        return amount
+    }
+    
+    func addCircleForColumnAtIndex(index index: Int) {
+        let columnPosition = getOriginPositionOfColumn(index)
+        let columnWidth = getColumnWidth()
+        let pointX = columnPosition.x + columnWidth/2
+        let pointY = columnPosition.y
+        let circlePath = UIBezierPath(ovalInRect: CGRect(x: pointX - columnCircleRadius, y: pointY - columnCircleRadius, width: columnCircleRadius*2, height: columnCircleRadius*2))
+        columnCircleColor.setFill()
+        circlePath.fill()
+        circlePath.closePath()
+    }
+    
+    func addDashedForColumnAtIndex(index index: Int) {
+        let columnPosition = getOriginPositionOfColumn(index)
+        let columnWidth = getColumnWidth()
+        let pointX = columnPosition.x + columnWidth/2
+        var pointY = columnPosition.y
+        let dashedPath = UIBezierPath()
+        
+
+        var canDraw = true
+        while canDraw {
+            var dashedHeight = columnDashedSize.height
+            if pointY > self.bounds.height - margin {
+                dashedHeight = 0
+                canDraw = false
+            } else if pointY + dashedHeight > self.bounds.height - margin {
+                dashedHeight = self.bounds.height - margin - pointY
+                canDraw = false
+            }
+            dashedPath.moveToPoint(CGPoint(x: pointX, y: pointY))
+            dashedPath.addLineToPoint(CGPoint(x: pointX, y: pointY + dashedHeight))
+            pointY += dashedHeight + distanceBetweenDashed
+        }
+        
+        dashedPath.lineWidth = columnDashedSize.width
+        columnDashedColor.setStroke()
+        dashedPath.stroke()
+        dashedPath.closePath()
     }
 }
 
