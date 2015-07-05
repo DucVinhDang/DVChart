@@ -10,14 +10,24 @@ import UIKit
 
 class ViewController: UIViewController {
     
+//    var data: [String: Int] = [
+//        "Rất tồi" : 12,
+//        "Tồi" : 30,
+//        "Hơi tệ" : 25,
+//        "Bình thường" : 10,
+//        "Khá tốt" : 23,
+//        "Tốt" : 14,
+//        "Rất tốt" : 24
+//    ]
+    
     var data: [String: Int] = [
-        "Rất tồi" : 12,
-        "Tồi" : 30,
-        "Hơi tệ" : 25,
-        "Bình thường" : 10,
-        "Khá tốt" : 23,
-        "Tốt" : 14,
-        "Rất tốt" : 24
+        "2001" : 12,
+        "2002" : 30,
+        "2003" : 25,
+        "2004" : 10,
+        "2005" : 23,
+        "2006" : 14,
+        "2007" : 24
     ]
     
     weak var chart: DVChart?
@@ -40,15 +50,15 @@ class ViewController: UIViewController {
 //        myChart.show()
 //        chart = myChart
         
-//        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .BarChart, data: data)
-//        myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
-//        myChart.show()
-//        chart = myChart
-        
-        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .LineChart, data: data)
+        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .BarChart, data: data)
         myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
         myChart.show()
         chart = myChart
+        
+//        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .LineChart, data: data)
+//        myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
+//        myChart.show()
+//        chart = myChart
     }
 
     override func didReceiveMemoryWarning() {
@@ -58,7 +68,7 @@ class ViewController: UIViewController {
     
     @IBAction func touchAction(sender: AnyObject) {
         for key in self.data.keys {
-            data[key] = 10 + Int(arc4random()%30)
+            data[key] = Int(arc4random()%30)
         }
         
         UIView.animateWithDuration(0.2, animations: {
