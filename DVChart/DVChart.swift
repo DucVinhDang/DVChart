@@ -403,14 +403,19 @@ class LineChart: UIView {
     var margin: CGFloat = 10
     let distanceBetweenColumns = 10
     
-    var verticalAxisLabels: [UILabel]?
-    var horizontalAxisLabels: [UILabel]?
+    var verticalAxisLabels = [UILabel]()
+    var horizontalAxisLabels = [UILabel]()
+    
+    var columnValueLabels = [UILabel]()
+    var columnKeyLabels = [UILabel]()
     
     let axesLineWidth: CGFloat = 2
     let lineBetweenColumnsWidth: CGFloat = 2
     let columnDashedSize = CGSize(width: 1, height: 6)
     let distanceBetweenDashed: CGFloat = 4
     let columnCircleRadius: CGFloat = 3
+    let verticalAxisTinyLineWidth: CGFloat = 4
+    let horizontalAxisTinyLineWidth: CGFloat = 6
     let arrowAxesSizeX: CGFloat = 3
     let arrowAxesSizeY: CGFloat = 3
     
@@ -419,6 +424,8 @@ class LineChart: UIView {
     let lineBetweenColumnsColor = UIColor.whiteColor()
     let columnDashedColor = UIColor.whiteColor()
     let columnCircleColor = UIColor.whiteColor()
+    let columnValueLabelColor = UIColor.blackColor()
+    let columnKeyLabelColor = UIColor.blackColor()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -456,6 +463,8 @@ class LineChart: UIView {
         
         // Let's begin !!!
         
+        removeAllLabelArrays()
+        
         // Step 1: Drawing columns of chart
         
         let originPosition = getOriginPositionOfColumn(0)
@@ -463,6 +472,7 @@ class LineChart: UIView {
         
         addCircleForColumnAtIndex(index: 0)
         addDashedForColumnAtIndex(index: 0)
+        addValueLabelOfColumnAtIndex(index: 0)
         let columnPath = UIBezierPath()
         columnPath.moveToPoint(CGPoint(x: originPosition.x + columnWidth/2, y: originPosition.y))
         
@@ -470,6 +480,7 @@ class LineChart: UIView {
             if i+1 < data!.count {
                 addCircleForColumnAtIndex(index: i+1)
                 addDashedForColumnAtIndex(index: i+1)
+                addValueLabelOfColumnAtIndex(index: i+1)
                 let nextColumPosition = getOriginPositionOfColumn(i+1)
                 let pointX = nextColumPosition.x + columnWidth/2
                 let pointY = nextColumPosition.y
@@ -486,25 +497,39 @@ class LineChart: UIView {
         
         // Step 2: Drawing axes of chart
         
+            // Draw the vertical axis
+        
         let axesPath = UIBezierPath()
         axesPath.moveToPoint(CGPoint(x: margin, y: margin))
         axesPath.addLineToPoint(CGPoint(x: margin-arrowAxesSizeX, y: margin+arrowAxesSizeY))
         axesPath.moveToPoint(CGPoint(x: margin, y: margin))
         axesPath.addLineToPoint(CGPoint(x: margin+arrowAxesSizeX, y: margin+arrowAxesSizeY))
         axesPath.moveToPoint(CGPoint(x: margin, y: margin))
-        
         axesPath.addLineToPoint(CGPoint(x: margin, y: self.bounds.height-margin))
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
         
+            // Draw the horizontal axis
+        
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
         axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-arrowAxesSizeY))
         axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
         axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin+arrowAxesSizeY))
         
+        for i in 0..<data!.count {
+            let columnPosition = getOriginPositionOfColumn(i)
+            let startPointX = columnPosition.x + columnWidth/2
+            let startPointY = self.bounds.height - margin
+            axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY))
+            axesPath.addLineToPoint(CGPoint(x: startPointX, y: startPointY - (horizontalAxisTinyLineWidth/2)))
+            axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY))
+            axesPath.addLineToPoint(CGPoint(x: startPointX, y: startPointY + (horizontalAxisTinyLineWidth/2)))
+        }
         
         axesPath.lineWidth = axesLineWidth
         axesColor.setStroke()
         axesPath.stroke()
         axesPath.closePath()
+        
+        
     }
     
     func getOriginPositionOfColumn(index: Int) -> CGPoint {
@@ -537,6 +562,24 @@ class LineChart: UIView {
         var amount = 0
         for object in data!.values { amount += object }
         return amount
+    }
+    
+    func addValueLabelOfColumnAtIndex(index index:Int) {
+        let columnPosition = getOriginPositionOfColumn(index)
+        let columnHeight = getColumnHeightAtIndex(columnIndex: index)
+        let labelOriginPoint = CGPoint(x: columnPosition.x, y: columnPosition.y + columnHeight/2)
+        
+        let text = String(data!.values.array[index])
+        let myText: NSString = text as NSString
+        let textSize: CGSize = myText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(14)])
+        
+        let label = UILabel(frame: CGRect(x: labelOriginPoint.x + getColumnWidth()/2 - textSize.width/2, y: labelOriginPoint.y, width: textSize.width, height: textSize.height))
+        label.text = text
+        label.font = UIFont(name: "Helvetica", size: 12)
+        label.textColor = columnValueLabelColor
+        label.textAlignment = .Center
+        self.addSubview(label)
+        columnValueLabels.append(label)
     }
     
     func addCircleForColumnAtIndex(index index: Int) {
@@ -578,6 +621,22 @@ class LineChart: UIView {
         dashedPath.stroke()
         dashedPath.closePath()
     }
+    
+    func removeAllLabelArrays() {
+        for label in verticalAxisLabels { label.removeFromSuperview() }
+        verticalAxisLabels.removeAll()
+        
+        for label in horizontalAxisLabels { label.removeFromSuperview() }
+        horizontalAxisLabels.removeAll()
+        
+        for label in columnKeyLabels { label.removeFromSuperview() }
+        columnKeyLabels.removeAll()
+        
+        for label in columnValueLabels { label.removeFromSuperview() }
+        columnValueLabels.removeAll()
+    }
+    
+    
 }
 
 extension UIColor {
