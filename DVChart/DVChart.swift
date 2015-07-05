@@ -418,6 +418,8 @@ class LineChart: UIView {
     let horizontalAxisTinyLineWidth: CGFloat = 6
     let arrowAxesSizeX: CGFloat = 3
     let arrowAxesSizeY: CGFloat = 3
+    let distanceBetweenHorizontalAxisAndKeyLabels: CGFloat = 10
+    var columnKeyLabelsMaxHeight: CGFloat = 0
     
     let axesColor = UIColor.blackColor()
     let columnColor = UIColor.randomColor()
@@ -464,8 +466,10 @@ class LineChart: UIView {
         // Let's begin !!!
         
         removeAllLabelArrays()
+        createColumnKeyLabels()
+        columnKeyLabelsMaxHeight = getMaxHeightOfColumnKeyLabels()
         
-        // Step 1: Drawing columns of chart
+        // Step 1: Drawing columns of chart and column value labels
         
         let originPosition = getOriginPositionOfColumn(0)
         let columnWidth = getColumnWidth()
@@ -505,19 +509,19 @@ class LineChart: UIView {
         axesPath.moveToPoint(CGPoint(x: margin, y: margin))
         axesPath.addLineToPoint(CGPoint(x: margin+arrowAxesSizeX, y: margin+arrowAxesSizeY))
         axesPath.moveToPoint(CGPoint(x: margin, y: margin))
-        axesPath.addLineToPoint(CGPoint(x: margin, y: self.bounds.height-margin))
+        axesPath.addLineToPoint(CGPoint(x: margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
         
             // Draw the horizontal axis
         
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-arrowAxesSizeY))
-        axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin))
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin+arrowAxesSizeY))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-columnKeyLabelsMaxHeight-arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-columnKeyLabelsMaxHeight+arrowAxesSizeY))
         
         for i in 0..<data!.count {
             let columnPosition = getOriginPositionOfColumn(i)
             let startPointX = columnPosition.x + columnWidth/2
-            let startPointY = self.bounds.height - margin
+            let startPointY = self.bounds.height - margin - columnKeyLabelsMaxHeight
             axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY))
             axesPath.addLineToPoint(CGPoint(x: startPointX, y: startPointY - (horizontalAxisTinyLineWidth/2)))
             axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY))
@@ -529,14 +533,29 @@ class LineChart: UIView {
         axesPath.stroke()
         axesPath.closePath()
         
+        // Draw the circle for root point of axes
         
+        let rootCircleWidth: CGFloat = 6
+        let rootCircleHeight: CGFloat = 6
+        let rootCircleX = margin - rootCircleWidth/2
+        let rootCircleY = self.bounds.height - margin - columnKeyLabelsMaxHeight - rootCircleHeight/2
+        
+        let rootCirclePath = UIBezierPath(ovalInRect: CGRect(x: rootCircleX, y: rootCircleY, width: rootCircleWidth, height: rootCircleHeight))
+        axesColor.setFill()
+        rootCirclePath.fill()
+        rootCirclePath.closePath()
+        
+        // Step 3: Draw the column key labels
+        
+        setPositionAgainAndAddColumnKeyLabelsToView()
+
     }
     
     func getOriginPositionOfColumn(index: Int) -> CGPoint {
         let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
         let columnValue = getTheColumnValue(column: index)
         let columnWidth = getColumnWidth()
-        let chartHeight = self.bounds.height - (2 * margin)
+        let chartHeight = self.bounds.height - columnKeyLabelsMaxHeight - (2 * margin)
         
         let posX = margin + CGFloat((distanceBetweenColumns * (index + 1))) + (columnWidth * CGFloat(index))
         let posY = margin + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
@@ -551,7 +570,7 @@ class LineChart: UIView {
     
     func getColumnHeightAtIndex(columnIndex columnIndex:Int) -> CGFloat {
         let columnPosition = getOriginPositionOfColumn(columnIndex)
-        return self.bounds.height - columnPosition.y - margin
+        return self.bounds.height - columnPosition.y - margin - columnKeyLabelsMaxHeight
     }
     
     func getTheColumnValue(column column: Int) -> Int {
@@ -562,6 +581,40 @@ class LineChart: UIView {
         var amount = 0
         for object in data!.values { amount += object }
         return amount
+    }
+    
+    func createColumnKeyLabels() {
+        let columnWidth = getColumnWidth()
+        for i in 0..<data!.keys.array.count {
+            let columnPosition = getOriginPositionOfColumn(i)
+            let posX = columnPosition.x
+            let posY = self.bounds.height - margin
+            let label:UILabel = UILabel(frame: CGRectMake(posX, posY, columnWidth, CGFloat.max))
+            label.numberOfLines = 0
+            label.lineBreakMode = NSLineBreakMode.ByWordWrapping
+            label.font = UIFont(name: "Helvetica", size: 11)
+            label.text = data!.keys.array[i]
+            label.textAlignment = .Center
+            label.sizeToFit()
+            columnKeyLabels.append(label)
+        }
+    }
+    
+    func getMaxHeightOfColumnKeyLabels() -> CGFloat {
+        var value: CGFloat = 0
+        for label in columnKeyLabels {
+            if label.bounds.height > value {
+                value = label.frame.height
+            }
+        }
+        return value + distanceBetweenHorizontalAxisAndKeyLabels
+    }
+    
+    func setPositionAgainAndAddColumnKeyLabelsToView() {
+        for label in columnKeyLabels {
+            label.frame.origin = CGPoint(x: label.frame.origin.x, y: self.bounds.height - margin - columnKeyLabelsMaxHeight + distanceBetweenHorizontalAxisAndKeyLabels)
+            self.addSubview(label)
+        }
     }
     
     func addValueLabelOfColumnAtIndex(index index:Int) {
@@ -604,11 +657,11 @@ class LineChart: UIView {
         var canDraw = true
         while canDraw {
             var dashedHeight = columnDashedSize.height
-            if pointY > self.bounds.height - margin {
+            if pointY > self.bounds.height - margin - columnKeyLabelsMaxHeight {
                 dashedHeight = 0
                 canDraw = false
-            } else if pointY + dashedHeight > self.bounds.height - margin {
-                dashedHeight = self.bounds.height - margin - pointY
+            } else if pointY + dashedHeight > self.bounds.height - margin - columnKeyLabelsMaxHeight {
+                dashedHeight = self.bounds.height - margin - columnKeyLabelsMaxHeight - pointY
                 canDraw = false
             }
             dashedPath.moveToPoint(CGPoint(x: pointX, y: pointY))
