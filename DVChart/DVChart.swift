@@ -91,13 +91,14 @@ class DVChart: UIViewController {
         self.view.frame = chartFrame
         self.view.translatesAutoresizingMaskIntoConstraints = false
         self.view.autoresizingMask = UIViewAutoresizing.FlexibleHeight
-        self.view.backgroundColor = UIColor.clearColor()
+        self.view.backgroundColor = UIColor.blueColor()
     }
     
     private func setupChart() {
-        let chartSize = min(chartFrame.width, chartFrame.height)
+        
         switch chartType {
         case .PieChart:
+            let chartSize = min(chartFrame.width, chartFrame.height)
             pieChart = PieChart(frame: CGRect(x: 0, y: 0, width: chartSize, height: chartSize), data: data!)
             pieChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
             view.addSubview(pieChart!)
@@ -107,7 +108,7 @@ class DVChart: UIViewController {
             currentChart = pieChart
             break
         case .BarChart:
-            barChart = BarChart(frame: CGRect(x: 0, y: 0, width: chartSize, height: chartSize), data: data!)
+            barChart = BarChart(frame: CGRect(x: 0, y: 0, width: chartFrame.width, height: chartFrame.height), data: data!)
             barChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
             view.addSubview(barChart!)
             target.addChildViewController(self)
@@ -116,7 +117,7 @@ class DVChart: UIViewController {
             currentChart = barChart
             break
         case.LineChart:
-            lineChart = LineChart(frame: CGRect(x: 0, y: 0, width: chartSize, height: chartSize), data: data!)
+            lineChart = LineChart(frame: CGRect(x: 0, y: 0, width: chartFrame.width, height: chartFrame.height), data: data!)
             lineChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
             view.addSubview(lineChart!)
             target.addChildViewController(self)
@@ -415,10 +416,10 @@ class BarChart: UIView {
         let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
         let columnValue = getTheColumnValue(column: index)
         let columnWidth = getColumnWidth()
-        let chartHeight = self.bounds.height - columnKeyLabelsMaxHeight - (2 * margin)
+        let chartHeight = self.bounds.height - (2 * columnKeyLabelsMaxHeight) - (2 * margin)
         
         let posX = margin + CGFloat((distanceBetweenColumns * (index + 1))) + (columnWidth * CGFloat(index))
-        let posY = margin + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
+        let posY = margin + columnKeyLabelsMaxHeight + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
         return CGPoint(x: posX, y: posY)
     }
     
@@ -509,7 +510,7 @@ class BarChart: UIView {
     func addDashedForColumnAtIndex(index index: Int) {
         let columnPosition = getOriginPositionOfColumn(index)
         var pointX = columnPosition.x
-        let pointY = columnPosition.y
+        let pointY = columnPosition.y + columnDashedSize.height
         let dashedPath = UIBezierPath()
         
         var canDraw = true
@@ -740,10 +741,10 @@ class LineChart: UIView {
         let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
         let columnValue = getTheColumnValue(column: index)
         let columnWidth = getColumnWidth()
-        let chartHeight = self.bounds.height - columnKeyLabelsMaxHeight - (2 * margin)
+        let chartHeight = self.bounds.height - (2 * columnKeyLabelsMaxHeight) - (2 * margin)
         
         let posX = margin + CGFloat((distanceBetweenColumns * (index + 1))) + (columnWidth * CGFloat(index))
-        let posY = margin + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
+        let posY = margin + columnKeyLabelsMaxHeight + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
         return CGPoint(x: posX, y: posY)
     }
     
