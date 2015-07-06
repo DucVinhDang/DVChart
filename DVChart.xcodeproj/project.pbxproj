@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A32B91961B4A57FC007A0476 /* PieChartVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A32B91941B4A57FC007A0476 /* PieChartVC.swift */; };
+		A32B91971B4A57FC007A0476 /* PieChartVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = A32B91951B4A57FC007A0476 /* PieChartVC.xib */; };
+		A32B919A1B4A5819007A0476 /* BarChartVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A32B91981B4A5819007A0476 /* BarChartVC.swift */; };
+		A32B919B1B4A5819007A0476 /* BarChartVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = A32B91991B4A5819007A0476 /* BarChartVC.xib */; };
+		A32B919E1B4A582C007A0476 /* LineChartVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = A32B919C1B4A582C007A0476 /* LineChartVC.swift */; };
+		A32B919F1B4A582C007A0476 /* LineChartVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = A32B919D1B4A582C007A0476 /* LineChartVC.xib */; };
 		A3F485A11B456F7900B713B1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F485A01B456F7900B713B1 /* AppDelegate.swift */; };
 		A3F485A81B456F7900B713B1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A3F485A71B456F7900B713B1 /* Assets.xcassets */; };
 		A3F485AB1B456F7900B713B1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3F485A91B456F7900B713B1 /* LaunchScreen.storyboard */; };
@@ -35,6 +41,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A32B91941B4A57FC007A0476 /* PieChartVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieChartVC.swift; sourceTree = "<group>"; };
+		A32B91951B4A57FC007A0476 /* PieChartVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PieChartVC.xib; sourceTree = "<group>"; };
+		A32B91981B4A5819007A0476 /* BarChartVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarChartVC.swift; sourceTree = "<group>"; };
+		A32B91991B4A5819007A0476 /* BarChartVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BarChartVC.xib; sourceTree = "<group>"; };
+		A32B919C1B4A582C007A0476 /* LineChartVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineChartVC.swift; sourceTree = "<group>"; };
+		A32B919D1B4A582C007A0476 /* LineChartVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LineChartVC.xib; sourceTree = "<group>"; };
 		A3F4859D1B456F7900B713B1 /* DVChart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DVChart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A3F485A01B456F7900B713B1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A3F485A71B456F7900B713B1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -76,6 +88,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A32B91A01B4A5D53007A0476 /* Third Parties */ = {
+			isa = PBXGroup;
+			children = (
+				A3F485D71B457C5C00B713B1 /* DVChart.swift */,
+			);
+			name = "Third Parties";
+			sourceTree = "<group>";
+		};
 		A3F485941B456F7900B713B1 = {
 			isa = PBXGroup;
 			children = (
@@ -103,6 +123,7 @@
 				A3F485D01B456FC800B713B1 /* Controllers */,
 				A3F485CF1B456FC400B713B1 /* Views */,
 				A3F485CE1B456FBE00B713B1 /* Models */,
+				A32B91A01B4A5D53007A0476 /* Third Parties */,
 				A3F485A71B456F7900B713B1 /* Assets.xcassets */,
 				A3F485A91B456F7900B713B1 /* LaunchScreen.storyboard */,
 				A3F485AC1B456F7900B713B1 /* Info.plist */,
@@ -139,6 +160,9 @@
 			isa = PBXGroup;
 			children = (
 				A3F485D21B456FDE00B713B1 /* ViewController.xib */,
+				A32B91951B4A57FC007A0476 /* PieChartVC.xib */,
+				A32B91991B4A5819007A0476 /* BarChartVC.xib */,
+				A32B919D1B4A582C007A0476 /* LineChartVC.xib */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -146,8 +170,10 @@
 		A3F485D01B456FC800B713B1 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				A3F485D71B457C5C00B713B1 /* DVChart.swift */,
 				A3F485D11B456FDE00B713B1 /* ViewController.swift */,
+				A32B91941B4A57FC007A0476 /* PieChartVC.swift */,
+				A32B91981B4A5819007A0476 /* BarChartVC.swift */,
+				A32B919C1B4A582C007A0476 /* LineChartVC.swift */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -256,9 +282,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A32B91971B4A57FC007A0476 /* PieChartVC.xib in Resources */,
 				A3F485AB1B456F7900B713B1 /* LaunchScreen.storyboard in Resources */,
 				A3F485D41B456FDE00B713B1 /* ViewController.xib in Resources */,
+				A32B919B1B4A5819007A0476 /* BarChartVC.xib in Resources */,
 				A3F485A81B456F7900B713B1 /* Assets.xcassets in Resources */,
+				A32B919F1B4A582C007A0476 /* LineChartVC.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,8 +312,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A32B91961B4A57FC007A0476 /* PieChartVC.swift in Sources */,
+				A32B919E1B4A582C007A0476 /* LineChartVC.swift in Sources */,
 				A3F485D31B456FDE00B713B1 /* ViewController.swift in Sources */,
 				A3F485A11B456F7900B713B1 /* AppDelegate.swift in Sources */,
+				A32B919A1B4A5819007A0476 /* BarChartVC.swift in Sources */,
 				A3F485D81B457C5C00B713B1 /* DVChart.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

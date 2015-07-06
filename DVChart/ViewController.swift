@@ -20,20 +20,9 @@ class ViewController: UIViewController {
 //        "Rất tốt" : 24
 //    ]
     
-    var data: [String: Int] = [
-        "2001" : 12,
-        "2002" : 30,
-        "2003" : 25,
-        "2004" : 10,
-        "2005" : 23,
-        "2006" : 14,
-        "2007" : 24
-    ]
+    let array = ["Piechart", "Barchart", "Linechart"]
     
-    weak var chart: DVChart?
-    
-    let deviceWidth = UIScreen.mainScreen().bounds.size.width
-    let deviceHeight = UIScreen.mainScreen().bounds.size.height
+    @IBOutlet weak var tableView: UITableView!
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
@@ -45,50 +34,48 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-//        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 300), type: .PieChart, data: data)
-//        myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
-//        myChart.show()
-//        chart = myChart
-        
-        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .BarChart, data: data)
-        myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
-        myChart.show()
-        chart = myChart
-        
-//        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .LineChart, data: data)
-//        myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
-//        myChart.show()
-//        chart = myChart
+
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+
+}
+
+extension ViewController: UITableViewDataSource {
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return array.count
+    }
     
-    @IBAction func touchAction(sender: AnyObject) {
-        for key in self.data.keys {
-            data[key] = Int(arc4random()%30)
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "Cell")
+        cell.textLabel?.text = array[indexPath.row]
+        cell.detailTextLabel?.text = "Chart number \(indexPath.row + 1)"
+        cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+        return cell
+    }
+
+}
+
+extension ViewController: UITableViewDelegate {
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        switch indexPath.row {
+        case 0:
+            let pieChartVC = PieChartVC(nibName: "PieChartVC", bundle: nil)
+            self.navigationController?.pushViewController(pieChartVC, animated: true)
+            break
+        case 1:
+            let barChartVC = BarChartVC(nibName: "BarChartVC", bundle: nil)
+            self.navigationController?.pushViewController(barChartVC, animated: true)
+            break
+        case 2:
+            let lineChartVC = LineChartVC(nibName: "LineChartVC", bundle: nil)
+            self.navigationController?.pushViewController(lineChartVC, animated: true)
+            break
+        default:
+            break
         }
-        
-        UIView.animateWithDuration(0.2, animations: {
-            self.chart?.view.alpha = 0
-            }, completion: { finished in
-                UIView.animateWithDuration(0.2, animations: {
-                    self.chart?.data = self.data
-                    self.chart?.view.alpha = 1
-                })
-        })
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

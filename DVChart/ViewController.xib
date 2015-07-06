@@ -4,14 +4,10 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8101.16"/>
     </dependencies>
-    <customFonts key="customFonts">
-        <mutableArray key="AppleSDGothicNeo.ttc">
-            <string>AppleSDGothicNeo-UltraLight</string>
-        </mutableArray>
-    </customFonts>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ViewController" customModule="DVChart" customModuleProvider="target">
             <connections>
+                <outlet property="tableView" destination="Nd4-6u-Y7c" id="McC-05-pOW"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -20,28 +16,23 @@
             <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kvq-66-LDg">
-                    <rect key="frame" x="8" y="537" width="584" height="55"/>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="Nd4-6u-Y7c">
+                    <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                     <animations/>
-                    <color key="backgroundColor" red="0.40816543584802634" green="0.2147797106984155" blue="0.83597840310000004" alpha="1" colorSpace="calibratedRGB"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="55" id="odh-24-tbY"/>
-                    </constraints>
-                    <fontDescription key="fontDescription" name="AppleSDGothicNeo-UltraLight" family="Apple SD Gothic Neo" pointSize="23"/>
-                    <state key="normal" title="Touch to update chart">
-                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </state>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <connections>
-                        <action selector="touchAction:" destination="-1" eventType="touchUpInside" id="NCH-7V-gb2"/>
+                        <outlet property="dataSource" destination="-1" id="xoH-4y-Xci"/>
+                        <outlet property="delegate" destination="-1" id="1au-zE-f5X"/>
                     </connections>
-                </button>
+                </tableView>
             </subviews>
             <animations/>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
-                <constraint firstItem="kvq-66-LDg" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="8" id="m4s-yr-39d"/>
-                <constraint firstAttribute="bottom" secondItem="kvq-66-LDg" secondAttribute="bottom" constant="8" id="qOW-Nw-6Qh"/>
-                <constraint firstAttribute="trailing" secondItem="kvq-66-LDg" secondAttribute="trailing" constant="8" id="sdS-0p-aYl"/>
+                <constraint firstAttribute="bottom" secondItem="Nd4-6u-Y7c" secondAttribute="bottom" id="087-0d-1f6"/>
+                <constraint firstAttribute="trailing" secondItem="Nd4-6u-Y7c" secondAttribute="trailing" id="OLZ-jT-JBs"/>
+                <constraint firstItem="Nd4-6u-Y7c" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="RZI-OX-eyZ"/>
+                <constraint firstItem="Nd4-6u-Y7c" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="nUb-0s-EEj"/>
             </constraints>
         </view>
     </objects>

@@ -380,7 +380,7 @@ class BarChart: UIView {
         
         // Step 3: Drawing axes of chart
         
-        // Draw the vertical axis
+            // Draw the vertical axis
         
         let axesPath = UIBezierPath()
         axesPath.moveToPoint(CGPoint(x: margin, y: margin))
@@ -390,7 +390,7 @@ class BarChart: UIView {
         axesPath.moveToPoint(CGPoint(x: margin, y: margin))
         axesPath.addLineToPoint(CGPoint(x: margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
         
-        // Draw the horizontal axis
+            // Draw the horizontal axis
         
         axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
         axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-columnKeyLabelsMaxHeight-arrowAxesSizeY))
@@ -401,6 +401,10 @@ class BarChart: UIView {
         axesColor.setStroke()
         axesPath.stroke()
         axesPath.closePath()
+        
+            // Draw the circle for root point of axes
+        
+        addCircleForRootPointOfAxes()
         
         // Step 4: Draw the column key labels
         
@@ -528,6 +532,18 @@ class BarChart: UIView {
         dashedPath.closePath()
     }
     
+    func addCircleForRootPointOfAxes() {
+        let rootCircleWidth: CGFloat = 6
+        let rootCircleHeight: CGFloat = 6
+        let rootCircleX = margin - rootCircleWidth/2
+        let rootCircleY = self.bounds.height - margin - columnKeyLabelsMaxHeight - rootCircleHeight/2
+        
+        let rootCirclePath = UIBezierPath(ovalInRect: CGRect(x: rootCircleX, y: rootCircleY, width: rootCircleWidth, height: rootCircleHeight))
+        axesColor.setFill()
+        rootCirclePath.fill()
+        rootCirclePath.closePath()
+    }
+    
     func removeAllLabelArrays() {
         for label in verticalAxisLabels { label.removeFromSuperview() }
         verticalAxisLabels.removeAll()
@@ -625,30 +641,56 @@ class LineChart: UIView {
         let originPosition = getOriginPositionOfColumn(0)
         let columnWidth = getColumnWidth()
         
-        addCircleForColumnAtIndex(index: 0)
-        addDashedForColumnAtIndex(index: 0)
-        addValueLabelOfColumnAtIndex(index: 0)
         let columnPath = UIBezierPath()
         columnPath.moveToPoint(CGPoint(x: originPosition.x + columnWidth/2, y: originPosition.y))
         
         for i in 0..<data!.count {
             if i+1 < data!.count {
-                addCircleForColumnAtIndex(index: i+1)
-                addDashedForColumnAtIndex(index: i+1)
-                addValueLabelOfColumnAtIndex(index: i+1)
                 let nextColumPosition = getOriginPositionOfColumn(i+1)
                 let pointX = nextColumPosition.x + columnWidth/2
                 let pointY = nextColumPosition.y
                 columnPath.addLineToPoint(CGPoint(x: pointX, y: pointY))
             }
-            
         }
+        
+            // Add clipping path inside the chart
+        
+        CGContextSaveGState(context)
+    
+        let clippingPath = columnPath.copy() as! UIBezierPath
+        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(data!.count-1).x + columnWidth/2, y: self.bounds.height - margin - columnKeyLabelsMaxHeight))
+        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(0).x + columnWidth/2, y: self.bounds.height - margin - columnKeyLabelsMaxHeight))
+        clippingPath.closePath()
+        clippingPath.addClip()
+        
+        let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
+        var indexOfMaxValue = 0
+        for i in 0..<data!.values.count {
+            if data?.values.array[i] == maxValue {
+                indexOfMaxValue = i
+                break
+            }
+        }
+        
+        let startP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: getOriginPositionOfColumn(indexOfMaxValue).y)
+        let endP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: self.bounds.height - margin - columnKeyLabelsMaxHeight)
+        
+        CGContextDrawLinearGradient(context, gradient, startP, endP, CGGradientDrawingOptions.DrawsAfterEndLocation)
+        CGContextRestoreGState(context)
+        
+            // Finish the chart
         
         columnPath.lineWidth = lineBetweenColumnsWidth
         lineBetweenColumnsColor.setStroke()
         columnPath.stroke()
         
         columnPath.closePath()
+        
+        for i in 0..<data!.count {
+            addCircleForColumnAtIndex(index: i)
+            addDashedForColumnAtIndex(index: i)
+            addValueLabelOfColumnAtIndex(index: i)
+        }
         
         // Step 2: Drawing axes of chart
         
@@ -686,15 +728,7 @@ class LineChart: UIView {
         
         // Draw the circle for root point of axes
         
-        let rootCircleWidth: CGFloat = 6
-        let rootCircleHeight: CGFloat = 6
-        let rootCircleX = margin - rootCircleWidth/2
-        let rootCircleY = self.bounds.height - margin - columnKeyLabelsMaxHeight - rootCircleHeight/2
-        
-        let rootCirclePath = UIBezierPath(ovalInRect: CGRect(x: rootCircleX, y: rootCircleY, width: rootCircleWidth, height: rootCircleHeight))
-        axesColor.setFill()
-        rootCirclePath.fill()
-        rootCirclePath.closePath()
+        addCircleForRootPointOfAxes()
         
         // Step 3: Draw the column key labels
         
@@ -786,6 +820,7 @@ class LineChart: UIView {
         columnValueLabels.append(label)
     }
     
+    
     func addCircleForColumnAtIndex(index index: Int) {
         let columnPosition = getOriginPositionOfColumn(index)
         let columnWidth = getColumnWidth()
@@ -824,6 +859,18 @@ class LineChart: UIView {
         columnDashedColor.setStroke()
         dashedPath.stroke()
         dashedPath.closePath()
+    }
+    
+    func addCircleForRootPointOfAxes() {
+        let rootCircleWidth: CGFloat = 6
+        let rootCircleHeight: CGFloat = 6
+        let rootCircleX = margin - rootCircleWidth/2
+        let rootCircleY = self.bounds.height - margin - columnKeyLabelsMaxHeight - rootCircleHeight/2
+        
+        let rootCirclePath = UIBezierPath(ovalInRect: CGRect(x: rootCircleX, y: rootCircleY, width: rootCircleWidth, height: rootCircleHeight))
+        axesColor.setFill()
+        rootCirclePath.fill()
+        rootCirclePath.closePath()
     }
     
     func removeAllLabelArrays() {
