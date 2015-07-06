@@ -338,16 +338,52 @@ class BarChart: AxesChart {
         
         for i in 0..<data!.count {
             let originPosition = getOriginPositionOfColumn(i)
-            addValueLabelOfColumnAtIndex(index: i)
+            //addValueLabelOfColumnAtIndex(index: i)
             columnPath.moveToPoint(CGPoint(x: originPosition.x, y: horizontalY))
             columnPath.addLineToPoint(CGPoint(x: originPosition.x, y: originPosition.y))
             columnPath.addLineToPoint(CGPoint(x: originPosition.x + columnWidth, y: originPosition.y))
             columnPath.addLineToPoint(CGPoint(x: originPosition.x + columnWidth, y: horizontalY))
         }
         
+            // Add clipping path inside the chart
+        
+        CGContextSaveGState(context)
+        
+        let clippingPath = columnPath.copy() as! UIBezierPath
+        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(0).x, y: self.bounds.height - margin - columnKeyLabelsMaxHeight))
+        clippingPath.closePath()
+        clippingPath.addClip()
+        
+        let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
+        var indexOfMaxValue = 0
+        for i in 0..<data!.values.count {
+            if data?.values.array[i] == maxValue {
+                indexOfMaxValue = i
+                break
+            }
+        }
+        
+        let startP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: getOriginPositionOfColumn(indexOfMaxValue).y)
+        let endP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: self.bounds.height - margin - columnKeyLabelsMaxHeight)
+        
+        let clippingPathColors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
+        let clippingPathGradient = CGGradientCreateWithColors(colorSpace,
+            clippingPathColors,
+            colorLocations)
+        CGContextDrawLinearGradient(context, clippingPathGradient, startP, endP, CGGradientDrawingOptions.DrawsAfterEndLocation)
+        CGContextRestoreGState(context)
+        
+        // Finish the chart
+        
+        for i in 0..<data!.count {
+            addValueLabelOfColumnAtIndex(index: i)
+        }
+        
         columnPath.closePath()
-        UIColor.randomColor().setFill()
-        columnPath.fill()
+        
+//        columnPath.closePath()
+//        UIColor.randomColor().setFill()
+//        columnPath.fill()
         
         // Step 3: Drawing axes of chart
         
