@@ -91,7 +91,7 @@ class DVChart: UIViewController {
         self.view.frame = chartFrame
         self.view.translatesAutoresizingMaskIntoConstraints = false
         self.view.autoresizingMask = UIViewAutoresizing.FlexibleHeight
-        self.view.backgroundColor = UIColor.blueColor()
+        self.view.backgroundColor = UIColor.clearColor()
     }
     
     private func setupChart() {
@@ -281,58 +281,28 @@ class PieChart: UIView {
 //-------------------------- BARCHART ---------------------------//
 //---------------------------------------------------------------//
 
-class BarChart: UIView {
-    var data: [String:Int]? {
-        didSet { setNeedsDisplay() }
-    }
+class BarChart: AxesChart {
     
-    var verticalAxisLabels = [UILabel]()
-    var horizontalAxisLabels = [UILabel]()
-    var columnValueLabels = [UILabel]()
-    var columnKeyLabels = [UILabel]()
-    
-    var margin: CGFloat = 10
-    let distanceBetweenColumns = 10
-    let axesLineWidth: CGFloat = 2
-    let arrowAxesSizeX: CGFloat = 3
-    let arrowAxesSizeY: CGFloat = 3
-    
-    let lineBetweenColumnsWidth: CGFloat = 2
-    let columnDashedSize = CGSize(width: 6, height: 1)
-    let distanceBetweenDashed: CGFloat = 4
-    let columnCircleRadius: CGFloat = 3
-    let verticalAxisTinyLineWidth: CGFloat = 4
-    let horizontalAxisTinyLineWidth: CGFloat = 6
-    let distanceBetweenHorizontalAxisAndKeyLabels: CGFloat = 10
-    var columnKeyLabelsMaxHeight: CGFloat = 0
-    
-    let axesColor = UIColor.blackColor()
     let columnColor = UIColor.randomColor()
-    let lineBetweenColumnsColor = UIColor.whiteColor()
-    let columnDashedColor = UIColor.whiteColor()
-    let columnCircleColor = UIColor.whiteColor()
-    let columnValueLabelColor = UIColor.blackColor()
-    let columnKeyLabelColor = UIColor.blackColor()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setMarginForChart()
-        self.backgroundColor = UIColor.clearColor()
+        setupChart()
     }
     
-    init(frame: CGRect, data: [String:Int]) {
-        super.init(frame: frame)
-        setMarginForChart()
-        self.backgroundColor = UIColor.clearColor()
-        self.data = data
+    override init(frame: CGRect, data: [String:Int]) {
+        super.init(frame: frame, data: data)
+        setupChart()
     }
 
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setMarginForChart() {
-        margin = self.bounds.width/15
+    override func setupChart() {
+        super.setupChart()
+        self.columnDashedSize = CGSize(width: 6, height: 1)
+        self.backgroundColor = UIColor.clearColor()
     }
 
     override func drawRect(rect: CGRect) {
@@ -357,7 +327,7 @@ class BarChart: UIView {
         // Step 2: Drawing dashed of chart
         
         for i in 0..<data!.count {
-            addDashedForColumnAtIndex(index: i)
+            addDashedForColumnOfBarChartAtIndex(index: i)
         }
         
         // Step 1: Drawing columns of chart
@@ -412,102 +382,7 @@ class BarChart: UIView {
         setPositionAgainAndAddColumnKeyLabelsToView()
     }
     
-    func getOriginPositionOfColumn(index: Int) -> CGPoint {
-        let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
-        let columnValue = getTheColumnValue(column: index)
-        let columnWidth = getColumnWidth()
-        let chartHeight = self.bounds.height - (2 * columnKeyLabelsMaxHeight) - (2 * margin)
-        
-        let posX = margin + CGFloat((distanceBetweenColumns * (index + 1))) + (columnWidth * CGFloat(index))
-        let posY = margin + columnKeyLabelsMaxHeight + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
-        return CGPoint(x: posX, y: posY)
-    }
-    
-    func getColumnWidth() -> CGFloat {
-        let dataCount = data!.count
-        let chartWidth = self.bounds.width - (2 * margin)
-        return (chartWidth - CGFloat((distanceBetweenColumns * (dataCount+1)))) / CGFloat(dataCount)
-    }
-    
-    func getColumnHeightAtIndex(columnIndex columnIndex:Int) -> CGFloat {
-        let columnPosition = getOriginPositionOfColumn(columnIndex)
-        return self.bounds.height - columnPosition.y - margin - columnKeyLabelsMaxHeight - distanceBetweenHorizontalAxisAndKeyLabels
-    }
-    
-    func getTheColumnValue(column column: Int) -> Int {
-        return data!.values.array[column]
-    }
-    
-    func getTheTotalAmountOfData() -> Int {
-        var amount = 0
-        for object in data!.values { amount += object }
-        return amount
-    }
-    
-    func createColumnKeyLabels() {
-        let columnWidth = getColumnWidth()
-        for i in 0..<data!.keys.array.count {
-            let columnPosition = getOriginPositionOfColumn(i)
-            let posX = columnPosition.x
-            let posY = self.bounds.height - margin
-            let label:UILabel = UILabel(frame: CGRectMake(posX, posY, columnWidth, CGFloat.max))
-            label.numberOfLines = 0
-            label.lineBreakMode = NSLineBreakMode.ByWordWrapping
-            label.font = UIFont(name: "Helvetica", size: 11)
-            label.text = data!.keys.array[i]
-            label.textAlignment = .Center
-            label.sizeToFit()
-            columnKeyLabels.append(label)
-        }
-    }
-    
-    func getMaxHeightOfColumnKeyLabels() -> CGFloat {
-        var value: CGFloat = 0
-        for label in columnKeyLabels {
-            if label.bounds.height > value {
-                value = label.frame.height
-            }
-        }
-        return value + distanceBetweenHorizontalAxisAndKeyLabels
-    }
-    
-    func setPositionAgainAndAddColumnKeyLabelsToView() {
-        for label in columnKeyLabels {
-            label.frame.origin = CGPoint(x: label.frame.origin.x, y: self.bounds.height - margin - columnKeyLabelsMaxHeight + distanceBetweenHorizontalAxisAndKeyLabels)
-            self.addSubview(label)
-        }
-    }
-    
-    func addValueLabelOfColumnAtIndex(index index:Int) {
-        let columnPosition = getOriginPositionOfColumn(index)
-        let columnHeight = getColumnHeightAtIndex(columnIndex: index)
-        let labelOriginPoint = CGPoint(x: columnPosition.x, y: columnPosition.y + columnHeight/2)
-        
-        let text = String(data!.values.array[index])
-        let myText: NSString = text as NSString
-        let textSize: CGSize = myText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(14)])
-        
-        let label = UILabel(frame: CGRect(x: labelOriginPoint.x + getColumnWidth()/2 - textSize.width/2, y: labelOriginPoint.y, width: textSize.width, height: textSize.height))
-        label.text = text
-        label.font = UIFont(name: "Helvetica", size: 12)
-        label.textColor = columnValueLabelColor
-        label.textAlignment = .Center
-        self.addSubview(label)
-        columnValueLabels.append(label)
-    }
-    
-    func addCircleForColumnAtIndex(index index: Int) {
-        let columnPosition = getOriginPositionOfColumn(index)
-        let columnWidth = getColumnWidth()
-        let pointX = columnPosition.x + columnWidth/2
-        let pointY = columnPosition.y
-        let circlePath = UIBezierPath(ovalInRect: CGRect(x: pointX - columnCircleRadius, y: pointY - columnCircleRadius, width: columnCircleRadius*2, height: columnCircleRadius*2))
-        columnCircleColor.setFill()
-        circlePath.fill()
-        circlePath.closePath()
-    }
-    
-    func addDashedForColumnAtIndex(index index: Int) {
+    func addDashedForColumnOfBarChartAtIndex(index index: Int) {
         let columnPosition = getOriginPositionOfColumn(index)
         var pointX = columnPosition.x
         let pointY = columnPosition.y + columnDashedSize.height
@@ -533,89 +408,33 @@ class BarChart: UIView {
         dashedPath.closePath()
     }
     
-    func addCircleForRootPointOfAxes() {
-        let rootCircleWidth: CGFloat = 6
-        let rootCircleHeight: CGFloat = 6
-        let rootCircleX = margin - rootCircleWidth/2
-        let rootCircleY = self.bounds.height - margin - columnKeyLabelsMaxHeight - rootCircleHeight/2
-        
-        let rootCirclePath = UIBezierPath(ovalInRect: CGRect(x: rootCircleX, y: rootCircleY, width: rootCircleWidth, height: rootCircleHeight))
-        axesColor.setFill()
-        rootCirclePath.fill()
-        rootCirclePath.closePath()
-    }
-    
-    func removeAllLabelArrays() {
-        for label in verticalAxisLabels { label.removeFromSuperview() }
-        verticalAxisLabels.removeAll()
-        
-        for label in horizontalAxisLabels { label.removeFromSuperview() }
-        horizontalAxisLabels.removeAll()
-        
-        for label in columnKeyLabels { label.removeFromSuperview() }
-        columnKeyLabels.removeAll()
-        
-        for label in columnValueLabels { label.removeFromSuperview() }
-        columnValueLabels.removeAll()
-    }
 }
 
 //---------------------------------------------------------------//
 //------------------------- LINECHART ---------------------------//
 //---------------------------------------------------------------//
 
-class LineChart: UIView {
-    var data: [String:Int]? {
-        didSet { setNeedsDisplay() }
-    }
-    
-    var margin: CGFloat = 10
-    let distanceBetweenColumns = 10
-    
-    var verticalAxisLabels = [UILabel]()
-    var horizontalAxisLabels = [UILabel]()
-    var columnValueLabels = [UILabel]()
-    var columnKeyLabels = [UILabel]()
-    
-    let axesLineWidth: CGFloat = 2
-    let lineBetweenColumnsWidth: CGFloat = 2
-    let columnDashedSize = CGSize(width: 1, height: 6)
-    let distanceBetweenDashed: CGFloat = 4
+class LineChart: AxesChart {
     let columnCircleRadius: CGFloat = 3
-    let verticalAxisTinyLineWidth: CGFloat = 4
-    let horizontalAxisTinyLineWidth: CGFloat = 6
-    let arrowAxesSizeX: CGFloat = 3
-    let arrowAxesSizeY: CGFloat = 3
-    let distanceBetweenHorizontalAxisAndKeyLabels: CGFloat = 10
-    var columnKeyLabelsMaxHeight: CGFloat = 0
-    
-    let axesColor = UIColor.blackColor()
-    let columnColor = UIColor.randomColor()
-    let lineBetweenColumnsColor = UIColor.whiteColor()
-    let columnDashedColor = UIColor.whiteColor()
-    let columnCircleColor = UIColor.whiteColor()
-    let columnValueLabelColor = UIColor.blackColor()
-    let columnKeyLabelColor = UIColor.blackColor()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setMarginForChart()
-        self.backgroundColor = UIColor.clearColor()
+        setupChart()
     }
     
-    init(frame: CGRect, data: [String:Int]) {
-        super.init(frame: frame)
-        setMarginForChart()
-        self.backgroundColor = UIColor.clearColor()
-        self.data = data
+    override init(frame: CGRect, data: [String:Int]) {
+        super.init(frame: frame, data: data)
+        setupChart()
     }
     
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setMarginForChart() {
-        margin = self.bounds.width/15
+    override func setupChart() {
+        super.setupChart()
+        self.columnDashedSize = CGSize(width: 1, height: 6)
+        self.backgroundColor = UIColor.clearColor()
     }
     
     override func drawRect(rect: CGRect) {
@@ -689,7 +508,7 @@ class LineChart: UIView {
         
         for i in 0..<data!.count {
             addCircleForColumnAtIndex(index: i)
-            addDashedForColumnAtIndex(index: i)
+            addDashedForColumnOfLineChartAtIndex(index: i)
             addValueLabelOfColumnAtIndex(index: i)
         }
         
@@ -735,6 +554,104 @@ class LineChart: UIView {
         
         setPositionAgainAndAddColumnKeyLabelsToView()
 
+    }
+
+    func addCircleForColumnAtIndex(index index: Int) {
+        let columnPosition = getOriginPositionOfColumn(index)
+        let columnWidth = getColumnWidth()
+        let pointX = columnPosition.x + columnWidth/2
+        let pointY = columnPosition.y
+        let circlePath = UIBezierPath(ovalInRect: CGRect(x: pointX - columnCircleRadius, y: pointY - columnCircleRadius, width: columnCircleRadius*2, height: columnCircleRadius*2))
+        lineBetweenColumnsColor.setFill()
+        circlePath.fill()
+        circlePath.closePath()
+    }
+    
+    func addDashedForColumnOfLineChartAtIndex(index index: Int) {
+        let columnPosition = getOriginPositionOfColumn(index)
+        let columnWidth = getColumnWidth()
+        let pointX = columnPosition.x + columnWidth/2
+        var pointY = columnPosition.y
+        let dashedPath = UIBezierPath()
+        
+        
+        var canDraw = true
+        while canDraw {
+            var dashedHeight = columnDashedSize.height
+            if pointY > self.bounds.height - margin - columnKeyLabelsMaxHeight {
+                dashedHeight = 0
+                canDraw = false
+            } else if pointY + dashedHeight > self.bounds.height - margin - columnKeyLabelsMaxHeight {
+                dashedHeight = self.bounds.height - margin - columnKeyLabelsMaxHeight - pointY
+                canDraw = false
+            }
+            dashedPath.moveToPoint(CGPoint(x: pointX, y: pointY))
+            dashedPath.addLineToPoint(CGPoint(x: pointX, y: pointY + dashedHeight))
+            pointY += dashedHeight + distanceBetweenDashed
+        }
+        
+        dashedPath.lineWidth = columnDashedSize.width
+        columnDashedColor.setStroke()
+        dashedPath.stroke()
+        dashedPath.closePath()
+    }
+}
+
+//---------------------------------------------------------------//
+//------------------------- AXESCHART ---------------------------//
+//---------------------------------------------------------------//
+
+class AxesChart: UIView {
+    
+    // MARK: - Properties
+    
+    var data: [String:Int]? {
+        didSet { setNeedsDisplay() }
+    }
+    
+    var verticalAxisLabels = [UILabel]()
+    var horizontalAxisLabels = [UILabel]()
+    var columnValueLabels = [UILabel]()
+    var columnKeyLabels = [UILabel]()
+    
+    var margin: CGFloat = 10
+    let axesLineWidth: CGFloat = 2
+    var columnDashedSize = CGSize(width: 1, height: 6)
+    let lineBetweenColumnsWidth: CGFloat = 2
+    let distanceBetweenColumns = 10
+    let distanceBetweenDashed: CGFloat = 4
+    let verticalAxisTinyLineWidth: CGFloat = 4
+    let horizontalAxisTinyLineWidth: CGFloat = 6
+    let arrowAxesSizeX: CGFloat = 3
+    let arrowAxesSizeY: CGFloat = 3
+    let distanceBetweenHorizontalAxisAndKeyLabels: CGFloat = 10
+    var columnKeyLabelsMaxHeight: CGFloat = 0
+    
+    let axesColor = UIColor.blackColor()
+    let columnDashedColor = UIColor.whiteColor()
+    let columnValueLabelColor = UIColor.blackColor()
+    let columnKeyLabelColor = UIColor.blackColor()
+    let lineBetweenColumnsColor = UIColor.whiteColor()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupChart()
+        self.backgroundColor = UIColor.clearColor()
+    }
+    
+    init(frame: CGRect, data: [String:Int]) {
+        super.init(frame: frame)
+        setupChart()
+        self.data = data
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setupChart() {
+        margin = self.bounds.width/15
+        self.backgroundColor = UIColor.clearColor()
     }
     
     func getOriginPositionOfColumn(index: Int) -> CGPoint {
@@ -821,47 +738,6 @@ class LineChart: UIView {
         columnValueLabels.append(label)
     }
     
-    
-    func addCircleForColumnAtIndex(index index: Int) {
-        let columnPosition = getOriginPositionOfColumn(index)
-        let columnWidth = getColumnWidth()
-        let pointX = columnPosition.x + columnWidth/2
-        let pointY = columnPosition.y
-        let circlePath = UIBezierPath(ovalInRect: CGRect(x: pointX - columnCircleRadius, y: pointY - columnCircleRadius, width: columnCircleRadius*2, height: columnCircleRadius*2))
-        columnCircleColor.setFill()
-        circlePath.fill()
-        circlePath.closePath()
-    }
-    
-    func addDashedForColumnAtIndex(index index: Int) {
-        let columnPosition = getOriginPositionOfColumn(index)
-        let columnWidth = getColumnWidth()
-        let pointX = columnPosition.x + columnWidth/2
-        var pointY = columnPosition.y
-        let dashedPath = UIBezierPath()
-        
-
-        var canDraw = true
-        while canDraw {
-            var dashedHeight = columnDashedSize.height
-            if pointY > self.bounds.height - margin - columnKeyLabelsMaxHeight {
-                dashedHeight = 0
-                canDraw = false
-            } else if pointY + dashedHeight > self.bounds.height - margin - columnKeyLabelsMaxHeight {
-                dashedHeight = self.bounds.height - margin - columnKeyLabelsMaxHeight - pointY
-                canDraw = false
-            }
-            dashedPath.moveToPoint(CGPoint(x: pointX, y: pointY))
-            dashedPath.addLineToPoint(CGPoint(x: pointX, y: pointY + dashedHeight))
-            pointY += dashedHeight + distanceBetweenDashed
-        }
-        
-        dashedPath.lineWidth = columnDashedSize.width
-        columnDashedColor.setStroke()
-        dashedPath.stroke()
-        dashedPath.closePath()
-    }
-    
     func addCircleForRootPointOfAxes() {
         let rootCircleWidth: CGFloat = 6
         let rootCircleHeight: CGFloat = 6
@@ -888,6 +764,10 @@ class LineChart: UIView {
         columnValueLabels.removeAll()
     }
 }
+
+//---------------------------------------------------------------//
+//------------------------- EXTENSION ---------------------------//
+//---------------------------------------------------------------//
 
 extension UIColor {
     static func randomColor() -> UIColor {
