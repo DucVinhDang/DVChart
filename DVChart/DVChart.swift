@@ -102,6 +102,16 @@ class DVChart: UIViewController {
             pieChart = PieChart(frame: CGRect(x: 0, y: 0, width: chartSize, height: chartSize), data: data!)
             pieChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
             view.addSubview(pieChart!)
+            
+            pieChart?.translatesAutoresizingMaskIntoConstraints = false
+            
+            view.addConstraint(NSLayoutConstraint(item: pieChart!, attribute: NSLayoutAttribute.CenterX, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.CenterX, multiplier: 1.0, constant: 0))
+            view.addConstraint(NSLayoutConstraint(item: pieChart!, attribute: NSLayoutAttribute.CenterY, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0))
+            view.addConstraint(NSLayoutConstraint(item: pieChart!, attribute: NSLayoutAttribute.Height, relatedBy: .Equal, toItem: nil, attribute: NSLayoutAttribute.Height, multiplier: 1.0, constant: chartSize))
+            view.addConstraint(NSLayoutConstraint(item: pieChart!, attribute: NSLayoutAttribute.Width, relatedBy: .Equal, toItem: nil, attribute: NSLayoutAttribute.Width, multiplier: 1.0, constant: chartSize))
+            
+            target.view.translatesAutoresizingMaskIntoConstraints = true
+            
             target.addChildViewController(self)
             target.view.addSubview(self.view)
             self.didMoveToParentViewController(target)
@@ -111,6 +121,17 @@ class DVChart: UIViewController {
             barChart = BarChart(frame: CGRect(x: 0, y: 0, width: chartFrame.width, height: chartFrame.height), data: data!)
             barChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
             view.addSubview(barChart!)
+            
+            barChart?.translatesAutoresizingMaskIntoConstraints = false
+            
+            view.addConstraint(NSLayoutConstraint(item: barChart!, attribute: NSLayoutAttribute.Top, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Top, multiplier: 1.0, constant: 0))
+            view.addConstraint(NSLayoutConstraint(item: barChart!, attribute: NSLayoutAttribute.Left, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Left, multiplier: 1.0, constant: 0))
+            view.addConstraint(NSLayoutConstraint(item: barChart!, attribute: NSLayoutAttribute.Right, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Right, multiplier: 1.0, constant: 0))
+            view.addConstraint(NSLayoutConstraint(item: barChart!, attribute: NSLayoutAttribute.Bottom, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Bottom, multiplier: 1.0, constant: 0))
+            
+            target.view.translatesAutoresizingMaskIntoConstraints = true
+
+            
             target.addChildViewController(self)
             target.view.addSubview(self.view)
             self.didMoveToParentViewController(target)
@@ -118,8 +139,17 @@ class DVChart: UIViewController {
             break
         case.LineChart:
             lineChart = LineChart(frame: CGRect(x: 0, y: 0, width: chartFrame.width, height: chartFrame.height), data: data!)
-            lineChart?.center = CGPoint(x: view.bounds.width/2, y: view.bounds.height/2)
             view.addSubview(lineChart!)
+            
+            lineChart?.translatesAutoresizingMaskIntoConstraints = false
+            
+            view.addConstraint(NSLayoutConstraint(item: lineChart!, attribute: NSLayoutAttribute.Top, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Top, multiplier: 1.0, constant: 0))
+            view.addConstraint(NSLayoutConstraint(item: lineChart!, attribute: NSLayoutAttribute.Left, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Left, multiplier: 1.0, constant: 0))
+            view.addConstraint(NSLayoutConstraint(item: lineChart!, attribute: NSLayoutAttribute.Right, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Right, multiplier: 1.0, constant: 0))
+            view.addConstraint(NSLayoutConstraint(item: lineChart!, attribute: NSLayoutAttribute.Bottom, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Bottom, multiplier: 1.0, constant: 0))
+            
+            target.view.translatesAutoresizingMaskIntoConstraints = true
+            
             target.addChildViewController(self)
             target.view.addSubview(self.view)
             self.didMoveToParentViewController(target)

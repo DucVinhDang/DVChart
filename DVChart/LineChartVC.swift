@@ -24,6 +24,8 @@ class LineChartVC: UIViewController {
     
     let deviceWidth = UIScreen.mainScreen().bounds.size.width
     let deviceHeight = UIScreen.mainScreen().bounds.size.height
+    
+    let margin: CGFloat = 20
 
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
@@ -38,15 +40,28 @@ class LineChartVC: UIViewController {
         
         self.title = "Linechart"
         
-        let myChart = DVChart(target: self, frame: CGRect(x: 0, y: 0, width: deviceWidth - 40, height: 400), type: .LineChart, data: data)
+        let myChart = DVChart(target: self, frame: CGRect(x: margin, y: margin, width: deviceWidth - (margin * 2), height: 210), type: .LineChart, data: data)
         myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
         myChart.show()
+        
+        view.addConstraint(NSLayoutConstraint(item: myChart.view, attribute: NSLayoutAttribute.CenterX, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.CenterX, multiplier: 1.0, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: myChart.view, attribute: NSLayoutAttribute.CenterY, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: myChart.view, attribute: NSLayoutAttribute.Left, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Left, multiplier: 1.0, constant: margin))
+        view.addConstraint(NSLayoutConstraint(item: myChart.view, attribute: NSLayoutAttribute.Right, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Right, multiplier: 1.0, constant: -margin))
+        view.addConstraint(NSLayoutConstraint(item: myChart.view, attribute: NSLayoutAttribute.Height, relatedBy: .Equal, toItem: nil, attribute: NSLayoutAttribute.Height, multiplier: 1.0, constant: 210))
+        
         chart = myChart
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "deviceRotated", name: UIDeviceOrientationDidChangeNotification, object: nil)
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func deviceRotated() {
+        chart?.currentChart.setNeedsDisplay()
     }
     
     @IBAction func touchAction(sender: AnyObject) {
