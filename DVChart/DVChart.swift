@@ -336,6 +336,7 @@ class BarChart: AxesChart {
     }
 
     override func drawRect(rect: CGRect) {
+        super.drawRect(rect)
         let context = UIGraphicsGetCurrentContext()
         let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
         
@@ -504,6 +505,7 @@ class LineChart: AxesChart {
     }
     
     override func drawRect(rect: CGRect) {
+        super.drawRect(rect)
         let context = UIGraphicsGetCurrentContext()
         let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
         
@@ -716,8 +718,12 @@ class AxesChart: UIView {
     }
     
     func setupChart() {
-        margin = self.bounds.width/15
         self.backgroundColor = UIColor.clearColor()
+    }
+    
+    override func drawRect(rect: CGRect) {
+        if data == nil { return }
+        margin = self.bounds.width/15
     }
     
     func getOriginPositionOfColumn(index: Int) -> CGPoint {
@@ -765,6 +771,7 @@ class AxesChart: UIView {
             label.text = data!.keys.array[i]
             label.textAlignment = .Center
             label.sizeToFit()
+            label.center = CGPoint(x: posX + columnWidth/2, y: label.frame.origin.y + label.frame.height/2)
             columnKeyLabels.append(label)
         }
     }

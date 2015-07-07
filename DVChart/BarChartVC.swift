@@ -17,7 +17,8 @@ class BarChartVC: UIViewController {
         "2004" : 10,
         "2005" : 23,
         "2006" : 14,
-        "2007" : 24
+        "2007" : 24,
+        "2008" : 19
     ]
     
     weak var chart: DVChart?
