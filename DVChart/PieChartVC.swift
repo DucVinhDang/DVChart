@@ -50,7 +50,6 @@ class PieChartVC: UIViewController {
         view.addConstraint(NSLayoutConstraint(item: myChart.view, attribute: NSLayoutAttribute.Right, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Right, multiplier: 1.0, constant: -margin))
         view.addConstraint(NSLayoutConstraint(item: myChart.view, attribute: NSLayoutAttribute.Height, relatedBy: .Equal, toItem: nil, attribute: NSLayoutAttribute.Height, multiplier: 1.0, constant: 210))
         
-        myChart.show()
         chart = myChart
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "deviceRotated", name: UIDeviceOrientationDidChangeNotification, object: nil)

@@ -186,6 +186,7 @@ class PieChart: UIView {
     
     init(frame: CGRect, data: [String:Int]) {
         super.init(frame: frame)
+        self.backgroundColor = UIColor.clearColor()
         setupArcWidth()
         self.data = data
     }
@@ -203,6 +204,10 @@ class PieChart: UIView {
 //        let context = UIGraphicsGetCurrentContext()
 //        CGContextSetFillColorWithColor(context, UIColor.randomColor().CGColor)
 //        CGContextFillRect(context, rect);
+        
+        let cornerPath = UIBezierPath(roundedRect: rect, byRoundingCorners: UIRectCorner.AllCorners, cornerRadii: CGSize(width: 8, height: 8))
+        cornerPath.addClip()
+        cornerPath.closePath()
         
         let context = UIGraphicsGetCurrentContext()
         let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
@@ -325,6 +330,11 @@ class BarChart: AxesChart {
 
     override func drawRect(rect: CGRect) {
         super.drawRect(rect)
+        
+        let cornerPath = UIBezierPath(roundedRect: rect, byRoundingCorners: UIRectCorner.AllCorners, cornerRadii: CGSize(width: 8, height: 8))
+        cornerPath.addClip()
+        cornerPath.closePath()
+        
         let context = UIGraphicsGetCurrentContext()
         let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
         
@@ -336,6 +346,8 @@ class BarChart: AxesChart {
         let startPoint = CGPoint.zeroPoint
         let endPoint = CGPoint(x:0, y:self.bounds.height)
         CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
+        
+        
         
         // Let's begin !!!
         
@@ -489,11 +501,16 @@ class LineChart: AxesChart {
     override func setupChart() {
         super.setupChart()
         self.columnDashedSize = CGSize(width: 1, height: 6)
-        self.backgroundColor = UIColor.blueColor()
+        self.backgroundColor = UIColor.clearColor()
     }
     
     override func drawRect(rect: CGRect) {
         super.drawRect(rect)
+        
+        let cornerPath = UIBezierPath(roundedRect: rect, byRoundingCorners: UIRectCorner.AllCorners, cornerRadii: CGSize(width: 8, height: 8))
+        cornerPath.addClip()
+        cornerPath.closePath()
+        
         let context = UIGraphicsGetCurrentContext()
         let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
         
@@ -692,7 +709,6 @@ class AxesChart: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupChart()
-        self.backgroundColor = UIColor.clearColor()
     }
     
     init(frame: CGRect, data: [String:Int]) {
