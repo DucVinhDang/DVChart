@@ -42,6 +42,7 @@ class PieChartVC: UIViewController {
         
         let myChart = DVChart(target: self, frame: CGRect(x: margin, y: margin, width: deviceWidth - (margin * 2), height: 210), type: .PieChart, data: data)
         myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
+        myChart.show()
         
         view.addConstraint(NSLayoutConstraint(item: myChart.view, attribute: NSLayoutAttribute.CenterX, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.CenterX, multiplier: 1.0, constant: 0))
         view.addConstraint(NSLayoutConstraint(item: myChart.view, attribute: NSLayoutAttribute.CenterY, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0))
