@@ -143,6 +143,7 @@ class DVChart: UIViewController {
             
             lineChart?.translatesAutoresizingMaskIntoConstraints = false
             
+            
             view.addConstraint(NSLayoutConstraint(item: lineChart!, attribute: NSLayoutAttribute.Top, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Top, multiplier: 1.0, constant: 0))
             view.addConstraint(NSLayoutConstraint(item: lineChart!, attribute: NSLayoutAttribute.Left, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Left, multiplier: 1.0, constant: 0))
             view.addConstraint(NSLayoutConstraint(item: lineChart!, attribute: NSLayoutAttribute.Right, relatedBy: .Equal, toItem: view, attribute: NSLayoutAttribute.Right, multiplier: 1.0, constant: 0))
@@ -501,7 +502,7 @@ class LineChart: AxesChart {
     override func setupChart() {
         super.setupChart()
         self.columnDashedSize = CGSize(width: 1, height: 6)
-        self.backgroundColor = UIColor.clearColor()
+        self.backgroundColor = UIColor.blueColor()
     }
     
     override func drawRect(rect: CGRect) {
@@ -723,7 +724,19 @@ class AxesChart: UIView {
     
     override func drawRect(rect: CGRect) {
         if data == nil { return }
-        margin = self.bounds.width/15
+        margin = getMarginOfChart()
+    }
+    
+    func getMarginOfChart() -> CGFloat {
+        var value: CGFloat = 0
+        if UIDevice.currentDevice().orientation.isPortrait.boolValue {
+            print(self.bounds.width)
+            value = self.bounds.width/15
+        } else if UIDevice.currentDevice().orientation.isLandscape.boolValue {
+            print(self.bounds.height)
+            value = self.bounds.height/10
+        }
+        return value
     }
     
     func getOriginPositionOfColumn(index: Int) -> CGPoint {
