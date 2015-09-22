@@ -43,7 +43,7 @@ class DVChart: UIViewController {
         }
     }
     
-    var colorTable: [UIColor]?
+    
     
     // MARK: - Init Methods
     
@@ -178,6 +178,19 @@ class PieChart: UIView {
     var arcWidth: CGFloat = 130
     let pi: CGFloat = CGFloat(M_PI)
     
+    var colorTable = [
+        UIColor(red: 0.322, green: 0.886, blue: 0.965, alpha: 1.0),
+        UIColor(red: 0.949, green: 0.475, blue: 0.475, alpha: 1.0),
+        UIColor(red: 0.788, green: 0.561, blue: 0.949, alpha: 1.0),
+        UIColor(red: 0.451, green: 0.918, blue: 0.741, alpha: 1.0),
+        UIColor(red: 0.976, green: 0.6, blue: 0.808, alpha: 1.0),
+        UIColor(red: 0.6, green: 0.702, blue: 0.976, alpha: 1.0),
+        UIColor(red: 0.882, green: 0.882, blue: 0.545, alpha: 1.0),
+        UIColor(red: 0.58, green: 0.263, blue: 0.267, alpha: 1.0),
+        UIColor(red: 0.91, green: 0.518, blue: 0.447, alpha: 1.0),
+        UIColor(red: 0.69, green: 0.878, blue: 0.902, alpha: 1.0)
+    ]
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = UIColor.clearColor()
@@ -249,16 +262,19 @@ class PieChart: UIView {
             labelArray.removeAll()
         }
         
+        var count = 0
+        
         for (key,value) in data! {
             startSubAngle = endSubAngle
             endSubAngle = startSubAngle + subAngle * CGFloat(value)
             
             let subPath = UIBezierPath(arcCenter: center, radius: radius, startAngle: startSubAngle, endAngle: endSubAngle, clockwise: true)
             subPath.lineWidth = arcWidth
-            UIColor.randomColor().setStroke()
+            colorTable[count].setStroke()
             subPath.stroke()
 
             addLabelToChartPiece("\(key): \(String(value))%", startAngle: startSubAngle, endAngle: endSubAngle)
+            count++
         }
     }
     
@@ -284,17 +300,18 @@ class PieChart: UIView {
         let labelCenter = CGPoint(x: labelCenterX, y: labelCenterY)
         
         let myText: NSString = text as NSString
-        let textSize: CGSize = myText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(13)])
+        let textSize: CGSize = myText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(15)])
         
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: textSize.width, height: textSize.height))
         label.center = labelCenter
-        label.backgroundColor = UIColor.randomColor()
+        label.backgroundColor = UIColor.clearColor()
         label.layer.shadowOpacity = 0.2
         label.text = text
-        label.font = UIFont(name: "Helvetica", size: 11)
+        label.textColor = UIColor.whiteColor()
+        label.font = UIFont(name: "Helvetica", size: 13)
         label.textAlignment = NSTextAlignment.Center
-        label.layer.masksToBounds = true
-        label.layer.cornerRadius = 5
+//        label.layer.masksToBounds = true
+//        label.layer.cornerRadius = 5
         
         labelArray.append(label)
         
@@ -308,7 +325,9 @@ class PieChart: UIView {
 
 class BarChart: AxesChart {
     
-    let columnColor = UIColor.randomColor()
+    let columnColor = UIColor(red: 0.18, green: 0.737, blue: 0.949, alpha: 1.0)
+    let topBackgroundColor = UIColor(red: 0.788, green: 0.933, blue: 0.992, alpha: 1.0)
+    let bottomBackgroundColor = UIColor(red: 0.106, green: 0.706, blue: 0.933, alpha: 1.0)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -338,7 +357,7 @@ class BarChart: AxesChart {
         cornerPath.closePath()
         
         let context = UIGraphicsGetCurrentContext()
-        let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
+        let colors = [topBackgroundColor.CGColor, bottomBackgroundColor.CGColor]
         
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let colorLocations:[CGFloat] = [0.0, 1.0]
@@ -347,9 +366,10 @@ class BarChart: AxesChart {
             colorLocations)
         let startPoint = CGPoint.zero
         let endPoint = CGPoint(x:0, y:self.bounds.height)
-        CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
+        //CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
         
-        
+        CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
+        CGContextFillRect(context, rect)
         
         // Let's begin !!!
         
@@ -359,9 +379,9 @@ class BarChart: AxesChart {
         
         // Step 2: Drawing dashed of chart
         
-        for i in 0..<data!.count {
-            addDashedForColumnOfBarChartAtIndex(index: i)
-        }
+//        for i in 0..<data!.count {
+//            addDashedForColumnOfBarChartAtIndex(index: i)
+//        }
         
         // Step 1: Drawing columns of chart
         
@@ -401,7 +421,7 @@ class BarChart: AxesChart {
         let startP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: getOriginPositionOfColumn(indexOfMaxValue).y)
         let endP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight)
         
-        let clippingPathColors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
+        let clippingPathColors = [topBackgroundColor.CGColor, bottomBackgroundColor.CGColor]
         let clippingPathGradient = CGGradientCreateWithColors(colorSpace,
             clippingPathColors,
             colorLocations)
@@ -439,10 +459,20 @@ class BarChart: AxesChart {
         axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin.x, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight))
         axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin.x-arrowAxesSizeX, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight+arrowAxesSizeY))
         
+        for i in 0..<data!.count {
+            let columnPosition = getOriginPositionOfColumn(i)
+            let startPointX = columnPosition.x + columnWidth/2
+            let startPointY = self.bounds.height - margin.y - columnKeyLabelsMaxHeight
+            axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY))
+            axesPath.addLineToPoint(CGPoint(x: startPointX, y: startPointY + (horizontalAxisTinyLineWidth/2)))
+        }
+        
         axesPath.lineWidth = axesLineWidth
         axesColor.setStroke()
         axesPath.stroke()
         axesPath.closePath()
+        
+        
         
             // Draw the circle for root point of axes
         
@@ -614,9 +644,7 @@ class LineChart: AxesChart {
             let columnPosition = getOriginPositionOfColumn(i)
             let startPointX = columnPosition.x + columnWidth/2
             let startPointY = self.bounds.height - margin.y - columnKeyLabelsMaxHeight
-            axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY))
-            axesPath.addLineToPoint(CGPoint(x: startPointX, y: startPointY - (horizontalAxisTinyLineWidth/2)))
-            axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY))
+            axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY - (horizontalAxisTinyLineWidth/2)))
             axesPath.addLineToPoint(CGPoint(x: startPointX, y: startPointY + (horizontalAxisTinyLineWidth/2)))
         }
         
@@ -695,12 +723,12 @@ class AxesChart: UIView {
     
     var margin: CGPoint = CGPoint(x: 15, y: 10)
     let axesLineWidth: CGFloat = 1
-    var columnDashedSize = CGSize(width: 1, height: 6)
+    var columnDashedSize = CGSize(width: 0.5, height: 6)
     let lineBetweenColumnsWidth: CGFloat = 2
     let distanceBetweenColumns = 10
     let distanceBetweenDashed: CGFloat = 4
     let verticalAxisTinyLineWidth: CGFloat = 4
-    let horizontalAxisTinyLineWidth: CGFloat = 6
+    let horizontalAxisTinyLineWidth: CGFloat = 4
     let arrowAxesSizeX: CGFloat = 3
     let arrowAxesSizeY: CGFloat = 3
     let distanceBetweenHorizontalAxisAndKeyLabels: CGFloat = 8
@@ -835,8 +863,13 @@ class AxesChart: UIView {
         let label = UILabel(frame: CGRect(x: labelOriginPoint.x + getColumnWidth()/2 - textSize.width/2, y: labelOriginPoint.y, width: textSize.width, height: textSize.height))
         label.text = text
         label.font = UIFont(name: "Helvetica", size: 12)
-        label.textColor = columnValueLabelColor
+        label.textColor = UIColor.whiteColor()
         label.textAlignment = .Center
+
+//        label.backgroundColor = UIColor.redColor()
+//        label.layer.masksToBounds = true
+//        label.layer.cornerRadius = min(label.frame.width, label.frame.height)/2
+        
         self.addSubview(label)
         columnValueLabels.append(label)
     }
