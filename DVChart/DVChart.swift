@@ -43,8 +43,6 @@ class DVChart: UIViewController {
         }
     }
     
-    
-    
     // MARK: - Init Methods
     
     init(target: UIViewController,frame: CGRect, data: [String: Int]) {
@@ -270,7 +268,8 @@ class PieChart: UIView {
             
             let subPath = UIBezierPath(arcCenter: center, radius: radius, startAngle: startSubAngle, endAngle: endSubAngle, clockwise: true)
             subPath.lineWidth = arcWidth
-            colorTable[count].setStroke()
+            if let col: UIColor = colorTable[count] { col.setStroke() }
+            else { UIColor.randomColor().setStroke() }
             subPath.stroke()
 
             addLabelToChartPiece("\(key): \(String(value))%", startAngle: startSubAngle, endAngle: endSubAngle)
@@ -329,6 +328,19 @@ class BarChart: AxesChart {
     let topBackgroundColor = UIColor(red: 0.788, green: 0.933, blue: 0.992, alpha: 1.0)
     let bottomBackgroundColor = UIColor(red: 0.106, green: 0.706, blue: 0.933, alpha: 1.0)
     
+    var colorTable = [
+        UIColor(red: 0.322, green: 0.886, blue: 0.965, alpha: 1.0),
+        UIColor(red: 0.949, green: 0.475, blue: 0.475, alpha: 1.0),
+        UIColor(red: 0.788, green: 0.561, blue: 0.949, alpha: 1.0),
+        UIColor(red: 0.451, green: 0.918, blue: 0.741, alpha: 1.0),
+        UIColor(red: 0.976, green: 0.6, blue: 0.808, alpha: 1.0),
+        UIColor(red: 0.6, green: 0.702, blue: 0.976, alpha: 1.0),
+        UIColor(red: 0.882, green: 0.882, blue: 0.545, alpha: 1.0),
+        UIColor(red: 0.58, green: 0.263, blue: 0.267, alpha: 1.0),
+        UIColor(red: 0.91, green: 0.518, blue: 0.447, alpha: 1.0),
+        UIColor(red: 0.69, green: 0.878, blue: 0.902, alpha: 1.0)
+    ]
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupChart()
@@ -357,15 +369,15 @@ class BarChart: AxesChart {
         cornerPath.closePath()
         
         let context = UIGraphicsGetCurrentContext()
-        let colors = [topBackgroundColor.CGColor, bottomBackgroundColor.CGColor]
+//        let colors = [topBackgroundColor.CGColor, bottomBackgroundColor.CGColor]
         
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let colorLocations:[CGFloat] = [0.0, 1.0]
-        let gradient = CGGradientCreateWithColors(colorSpace,
-            colors,
-            colorLocations)
-        let startPoint = CGPoint.zero
-        let endPoint = CGPoint(x:0, y:self.bounds.height)
+//        let colorSpace = CGColorSpaceCreateDeviceRGB()
+//        let colorLocations:[CGFloat] = [0.0, 1.0]
+//        let gradient = CGGradientCreateWithColors(colorSpace,
+//            colors,
+//            colorLocations)
+//        let startPoint = CGPoint.zero
+//        let endPoint = CGPoint(x:0, y:self.bounds.height)
         //CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
         
         CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
@@ -387,46 +399,52 @@ class BarChart: AxesChart {
         
         let horizontalY = self.bounds.height - margin.y - columnKeyLabelsMaxHeight
         let columnWidth = getColumnWidth()
-        let columnPath = UIBezierPath()
+//        let columnPath = UIBezierPath()
         
         for i in 0..<data!.count {
             let originPosition = getOriginPositionOfColumn(i)
             //addValueLabelOfColumnAtIndex(index: i)
+            let columnPath = UIBezierPath()
             columnPath.moveToPoint(CGPoint(x: originPosition.x, y: horizontalY))
             columnPath.addLineToPoint(CGPoint(x: originPosition.x, y: originPosition.y))
             columnPath.addLineToPoint(CGPoint(x: originPosition.x + columnWidth, y: originPosition.y))
             columnPath.addLineToPoint(CGPoint(x: originPosition.x + columnWidth, y: horizontalY))
+            
+            if let col: UIColor = colorTable[i] { col.setFill() }
+            else { UIColor.randomColor().setFill() }
+            columnPath.fill()
+            columnPath.closePath()
         }
         
             // Add clipping path inside the chart
         
-        CGContextSaveGState(context)
-        
-        let clippingPath = columnPath.copy() as! UIBezierPath
-        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(0).x, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight))
-        clippingPath.closePath()
-        clippingPath.addClip()
-        
-        let dataValues: [Int] = [Int](data!.values)
-        
-        let maxValue = dataValues.reduce(Int.min, combine: { max($0, $1) })
-        var indexOfMaxValue = 0
-        for i in 0..<dataValues.count {
-            if dataValues[i] == maxValue {
-                indexOfMaxValue = i
-                break
-            }
-        }
-        
-        let startP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: getOriginPositionOfColumn(indexOfMaxValue).y)
-        let endP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight)
-        
-        let clippingPathColors = [topBackgroundColor.CGColor, bottomBackgroundColor.CGColor]
-        let clippingPathGradient = CGGradientCreateWithColors(colorSpace,
-            clippingPathColors,
-            colorLocations)
-        CGContextDrawLinearGradient(context, clippingPathGradient, startP, endP, CGGradientDrawingOptions.DrawsAfterEndLocation)
-        CGContextRestoreGState(context)
+//        CGContextSaveGState(context)
+//        
+//        let clippingPath = columnPath.copy() as! UIBezierPath
+//        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(0).x, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight))
+//        clippingPath.closePath()
+//        clippingPath.addClip()
+//        
+//        let dataValues: [Int] = [Int](data!.values)
+//        
+//        let maxValue = dataValues.reduce(Int.min, combine: { max($0, $1) })
+//        var indexOfMaxValue = 0
+//        for i in 0..<dataValues.count {
+//            if dataValues[i] == maxValue {
+//                indexOfMaxValue = i
+//                break
+//            }
+//        }
+//        
+//        let startP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: getOriginPositionOfColumn(indexOfMaxValue).y)
+//        let endP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight)
+//        
+//        let clippingPathColors = [topBackgroundColor.CGColor, bottomBackgroundColor.CGColor]
+//        let clippingPathGradient = CGGradientCreateWithColors(colorSpace,
+//            clippingPathColors,
+//            colorLocations)
+//        CGContextDrawLinearGradient(context, clippingPathGradient, startP, endP, CGGradientDrawingOptions.DrawsAfterEndLocation)
+//        CGContextRestoreGState(context)
         
         // Finish the chart
         
@@ -434,7 +452,7 @@ class BarChart: AxesChart {
             addValueLabelOfColumnAtIndex(index: i)
         }
         
-        columnPath.closePath()
+//        columnPath.closePath()
         
 //        columnPath.closePath()
 //        UIColor.randomColor().setFill()
@@ -865,7 +883,7 @@ class AxesChart: UIView {
         label.font = UIFont(name: "Helvetica", size: 12)
         label.textColor = UIColor.whiteColor()
         label.textAlignment = .Center
-
+        label.layer.shadowOpacity = 0.3
 //        label.backgroundColor = UIColor.redColor()
 //        label.layer.masksToBounds = true
 //        label.layer.cornerRadius = min(label.frame.width, label.frame.height)/2
