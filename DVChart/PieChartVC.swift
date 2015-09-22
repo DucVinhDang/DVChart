@@ -40,7 +40,7 @@ class PieChartVC: UIViewController {
 
         self.title = "Piechart"
         
-        let myChart = DVChart(target: self, frame: CGRect(x: margin, y: margin, width: deviceWidth - (margin * 2), height: 210), type: .PieChart, data: data)
+        let myChart = DVChart(target: self, frame: CGRect(x: margin, y: margin, width: deviceWidth - (margin * 2), height: 310), type: .PieChart, data: data)
         myChart.view.center = CGPoint(x: deviceWidth/2, y: deviceHeight/2)
         myChart.show()
         

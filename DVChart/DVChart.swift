@@ -205,25 +205,27 @@ class PieChart: UIView {
 //        CGContextSetFillColorWithColor(context, UIColor.randomColor().CGColor)
 //        CGContextFillRect(context, rect);
         
+        if data == nil { return }
+        
         let cornerPath = UIBezierPath(roundedRect: rect, byRoundingCorners: UIRectCorner.AllCorners, cornerRadii: CGSize(width: 8, height: 8))
         cornerPath.addClip()
         cornerPath.closePath()
         
-        let context = UIGraphicsGetCurrentContext()
-        let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
-        
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let colorLocations:[CGFloat] = [0.0, 1.0]
-        let gradient = CGGradientCreateWithColors(colorSpace,
-            colors,
-            colorLocations)
-        let startPoint = CGPoint.zeroPoint
-        let endPoint = CGPoint(x:0, y:self.bounds.height)
-        CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
-        
 //        let context = UIGraphicsGetCurrentContext()
-//        CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
-//        CGContextFillRect(context, rect)
+//        let colors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
+//        
+//        let colorSpace = CGColorSpaceCreateDeviceRGB()
+//        let colorLocations:[CGFloat] = [0.0, 1.0]
+//        let gradient = CGGradientCreateWithColors(colorSpace,
+//            colors,
+//            colorLocations)
+//        let startPoint = CGPoint.zero
+//        let endPoint = CGPoint(x:0, y:self.bounds.height)
+//        CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
+        
+        let context = UIGraphicsGetCurrentContext()
+        CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
+        CGContextFillRect(context, rect)
         
         let center = CGPoint(x: self.frame.width/2, y: self.frame.height/2)
         let radius = min(self.bounds.width, self.bounds.height)/2 - arcWidth/2
@@ -287,12 +289,12 @@ class PieChart: UIView {
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: textSize.width, height: textSize.height))
         label.center = labelCenter
         label.backgroundColor = UIColor.randomColor()
-        label.layer.borderWidth = 0
-        label.layer.borderColor = UIColor.blackColor().CGColor
         label.layer.shadowOpacity = 0.2
         label.text = text
         label.font = UIFont(name: "Helvetica", size: 11)
         label.textAlignment = NSTextAlignment.Center
+        label.layer.masksToBounds = true
+        label.layer.cornerRadius = 5
         
         labelArray.append(label)
         
@@ -343,7 +345,7 @@ class BarChart: AxesChart {
         let gradient = CGGradientCreateWithColors(colorSpace,
             colors,
             colorLocations)
-        let startPoint = CGPoint.zeroPoint
+        let startPoint = CGPoint.zero
         let endPoint = CGPoint(x:0, y:self.bounds.height)
         CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
         
@@ -363,7 +365,7 @@ class BarChart: AxesChart {
         
         // Step 1: Drawing columns of chart
         
-        let horizontalY = self.bounds.height - margin - columnKeyLabelsMaxHeight
+        let horizontalY = self.bounds.height - margin.y - columnKeyLabelsMaxHeight
         let columnWidth = getColumnWidth()
         let columnPath = UIBezierPath()
         
@@ -381,21 +383,23 @@ class BarChart: AxesChart {
         CGContextSaveGState(context)
         
         let clippingPath = columnPath.copy() as! UIBezierPath
-        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(0).x, y: self.bounds.height - margin - columnKeyLabelsMaxHeight))
+        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(0).x, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight))
         clippingPath.closePath()
         clippingPath.addClip()
         
-        let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
+        let dataValues: [Int] = [Int](data!.values)
+        
+        let maxValue = dataValues.reduce(Int.min, combine: { max($0, $1) })
         var indexOfMaxValue = 0
-        for i in 0..<data!.values.count {
-            if data?.values.array[i] == maxValue {
+        for i in 0..<dataValues.count {
+            if dataValues[i] == maxValue {
                 indexOfMaxValue = i
                 break
             }
         }
         
         let startP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: getOriginPositionOfColumn(indexOfMaxValue).y)
-        let endP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: self.bounds.height - margin - columnKeyLabelsMaxHeight)
+        let endP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight)
         
         let clippingPathColors = [UIColor.randomColor().CGColor, UIColor.randomColor().CGColor]
         let clippingPathGradient = CGGradientCreateWithColors(colorSpace,
@@ -421,19 +425,19 @@ class BarChart: AxesChart {
             // Draw the vertical axis
         
         let axesPath = UIBezierPath()
-        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
-        axesPath.addLineToPoint(CGPoint(x: margin-arrowAxesSizeX, y: margin+arrowAxesSizeY))
-        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
-        axesPath.addLineToPoint(CGPoint(x: margin+arrowAxesSizeX, y: margin+arrowAxesSizeY))
-        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
-        axesPath.addLineToPoint(CGPoint(x: margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
+        axesPath.moveToPoint(CGPoint(x: margin.x, y: margin.y))
+        axesPath.addLineToPoint(CGPoint(x: margin.x-arrowAxesSizeX, y: margin.y+arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: margin.x, y: margin.y))
+        axesPath.addLineToPoint(CGPoint(x: margin.x+arrowAxesSizeX, y: margin.y+arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: margin.x, y: margin.y))
+        axesPath.addLineToPoint(CGPoint(x: margin.x, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight))
         
             // Draw the horizontal axis
         
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-columnKeyLabelsMaxHeight-arrowAxesSizeY))
-        axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-columnKeyLabelsMaxHeight+arrowAxesSizeY))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin.x, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin.x-arrowAxesSizeX, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight-arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin.x, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin.x-arrowAxesSizeX, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight+arrowAxesSizeY))
         
         axesPath.lineWidth = axesLineWidth
         axesColor.setStroke()
@@ -458,11 +462,11 @@ class BarChart: AxesChart {
         var canDraw = true
         while canDraw {
             var dashedWidth = columnDashedSize.width
-            if pointX < margin {
+            if pointX < margin.x {
                 dashedWidth = 0
                 canDraw = false
-            } else if pointX - dashedWidth < margin {
-                dashedWidth = pointX - margin
+            } else if pointX - dashedWidth < margin.x {
+                dashedWidth = pointX - margin.x
                 canDraw = false
             }
             dashedPath.moveToPoint(CGPoint(x: pointX, y: pointY))
@@ -519,7 +523,7 @@ class LineChart: AxesChart {
         let gradient = CGGradientCreateWithColors(colorSpace,
             colors,
             colorLocations)
-        let startPoint = CGPoint.zeroPoint
+        let startPoint = CGPoint.zero
         let endPoint = CGPoint(x:0, y:self.bounds.height)
         CGContextDrawLinearGradient(context, gradient, startPoint, endPoint, CGGradientDrawingOptions.DrawsAfterEndLocation)
         
@@ -551,22 +555,24 @@ class LineChart: AxesChart {
         CGContextSaveGState(context)
     
         let clippingPath = columnPath.copy() as! UIBezierPath
-        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(data!.count-1).x + columnWidth/2, y: self.bounds.height - margin - columnKeyLabelsMaxHeight))
-        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(0).x + columnWidth/2, y: self.bounds.height - margin - columnKeyLabelsMaxHeight))
+        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(data!.count-1).x + columnWidth/2, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight))
+        clippingPath.addLineToPoint(CGPoint(x: getOriginPositionOfColumn(0).x + columnWidth/2, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight))
         clippingPath.closePath()
         clippingPath.addClip()
         
-        let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
+        let dataValues: [Int] = [Int](data!.values)
+        
+        let maxValue = dataValues.reduce(Int.min, combine: { max($0, $1) })
         var indexOfMaxValue = 0
         for i in 0..<data!.values.count {
-            if data?.values.array[i] == maxValue {
+            if dataValues[i] == maxValue {
                 indexOfMaxValue = i
                 break
             }
         }
         
         let startP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: getOriginPositionOfColumn(indexOfMaxValue).y)
-        let endP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: self.bounds.height - margin - columnKeyLabelsMaxHeight)
+        let endP = CGPoint(x: getOriginPositionOfColumn(indexOfMaxValue).x, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight)
         
         CGContextDrawLinearGradient(context, gradient, startP, endP, CGGradientDrawingOptions.DrawsAfterEndLocation)
         CGContextRestoreGState(context)
@@ -590,24 +596,24 @@ class LineChart: AxesChart {
             // Draw the vertical axis
         
         let axesPath = UIBezierPath()
-        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
-        axesPath.addLineToPoint(CGPoint(x: margin-arrowAxesSizeX, y: margin+arrowAxesSizeY))
-        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
-        axesPath.addLineToPoint(CGPoint(x: margin+arrowAxesSizeX, y: margin+arrowAxesSizeY))
-        axesPath.moveToPoint(CGPoint(x: margin, y: margin))
-        axesPath.addLineToPoint(CGPoint(x: margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
+        axesPath.moveToPoint(CGPoint(x: margin.x, y: margin.y))
+        axesPath.addLineToPoint(CGPoint(x: margin.x-arrowAxesSizeX, y: margin.y+arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: margin.x, y: margin.y))
+        axesPath.addLineToPoint(CGPoint(x: margin.x+arrowAxesSizeX, y: margin.y+arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: margin.x, y: margin.y))
+        axesPath.addLineToPoint(CGPoint(x: margin.x, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight))
         
             // Draw the horizontal axis
         
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-columnKeyLabelsMaxHeight-arrowAxesSizeY))
-        axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin, y: self.bounds.height-margin-columnKeyLabelsMaxHeight))
-        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin-arrowAxesSizeX, y: self.bounds.height-margin-columnKeyLabelsMaxHeight+arrowAxesSizeY))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin.x, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin.x-arrowAxesSizeX, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight-arrowAxesSizeY))
+        axesPath.moveToPoint(CGPoint(x: self.bounds.width-margin.x, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight))
+        axesPath.addLineToPoint(CGPoint(x: self.bounds.width-margin.x-arrowAxesSizeX, y: self.bounds.height-margin.y-columnKeyLabelsMaxHeight+arrowAxesSizeY))
         
         for i in 0..<data!.count {
             let columnPosition = getOriginPositionOfColumn(i)
             let startPointX = columnPosition.x + columnWidth/2
-            let startPointY = self.bounds.height - margin - columnKeyLabelsMaxHeight
+            let startPointY = self.bounds.height - margin.y - columnKeyLabelsMaxHeight
             axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY))
             axesPath.addLineToPoint(CGPoint(x: startPointX, y: startPointY - (horizontalAxisTinyLineWidth/2)))
             axesPath.moveToPoint(CGPoint(x: startPointX, y: startPointY))
@@ -651,11 +657,11 @@ class LineChart: AxesChart {
         var canDraw = true
         while canDraw {
             var dashedHeight = columnDashedSize.height
-            if pointY > self.bounds.height - margin - columnKeyLabelsMaxHeight {
+            if pointY > self.bounds.height - margin.y - columnKeyLabelsMaxHeight {
                 dashedHeight = 0
                 canDraw = false
-            } else if pointY + dashedHeight > self.bounds.height - margin - columnKeyLabelsMaxHeight {
-                dashedHeight = self.bounds.height - margin - columnKeyLabelsMaxHeight - pointY
+            } else if pointY + dashedHeight > self.bounds.height - margin.y - columnKeyLabelsMaxHeight {
+                dashedHeight = self.bounds.height - margin.y - columnKeyLabelsMaxHeight - pointY
                 canDraw = false
             }
             dashedPath.moveToPoint(CGPoint(x: pointX, y: pointY))
@@ -687,8 +693,8 @@ class AxesChart: UIView {
     var columnValueLabels = [UILabel]()
     var columnKeyLabels = [UILabel]()
     
-    var margin: CGFloat = 10
-    let axesLineWidth: CGFloat = 2
+    var margin: CGPoint = CGPoint(x: 15, y: 10)
+    let axesLineWidth: CGFloat = 1
     var columnDashedSize = CGSize(width: 1, height: 6)
     let lineBetweenColumnsWidth: CGFloat = 2
     let distanceBetweenColumns = 10
@@ -697,7 +703,7 @@ class AxesChart: UIView {
     let horizontalAxisTinyLineWidth: CGFloat = 6
     let arrowAxesSizeX: CGFloat = 3
     let arrowAxesSizeY: CGFloat = 3
-    let distanceBetweenHorizontalAxisAndKeyLabels: CGFloat = 10
+    let distanceBetweenHorizontalAxisAndKeyLabels: CGFloat = 8
     var columnKeyLabelsMaxHeight: CGFloat = 0
     
     let axesColor = UIColor.blackColor()
@@ -730,40 +736,47 @@ class AxesChart: UIView {
         margin = getMarginOfChart()
     }
     
-    func getMarginOfChart() -> CGFloat {
-        var value: CGFloat = 0
+    func getMarginOfChart() -> CGPoint {
+        var value: CGPoint = CGPointZero
+//        if UIDevice.currentDevice().orientation.isPortrait.boolValue {
+//            value = self.bounds.width/15
+//        } else if UIDevice.currentDevice().orientation.isLandscape.boolValue {
+//            value = self.bounds.height/10
+//        }
         if UIDevice.currentDevice().orientation.isPortrait.boolValue {
-            value = self.bounds.width/15
+            value = CGPoint(x: 15, y: 10)
         } else if UIDevice.currentDevice().orientation.isLandscape.boolValue {
-            value = self.bounds.height/10
+            value = CGPoint(x: 15, y: 15)
         }
         return value
     }
     
     func getOriginPositionOfColumn(index: Int) -> CGPoint {
-        let maxValue = data!.values.array.reduce(Int.min, combine: { max($0, $1) })
+        let dataValues: [Int] = [Int](data!.values)
+        let maxValue = dataValues.reduce(Int.min, combine: { max($0, $1) })
         let columnValue = getTheColumnValue(column: index)
         let columnWidth = getColumnWidth()
-        let chartHeight = self.bounds.height - (2 * columnKeyLabelsMaxHeight) - (2 * margin)
+        let chartHeight = self.bounds.height - (2 * columnKeyLabelsMaxHeight) - (2 * margin.y)
         
-        let posX = margin + CGFloat((distanceBetweenColumns * (index + 1))) + (columnWidth * CGFloat(index))
-        let posY = margin + columnKeyLabelsMaxHeight + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
+        let posX = margin.x + CGFloat((distanceBetweenColumns * (index + 1))) + (columnWidth * CGFloat(index))
+        let posY = margin.y + columnKeyLabelsMaxHeight + (chartHeight - (CGFloat(columnValue)/CGFloat(maxValue)) * chartHeight)
         return CGPoint(x: posX, y: posY)
     }
     
     func getColumnWidth() -> CGFloat {
         let dataCount = data!.count
-        let chartWidth = self.bounds.width - (2 * margin)
+        let chartWidth = self.bounds.width - (2 * margin.x)
         return (chartWidth - CGFloat((distanceBetweenColumns * (dataCount+1)))) / CGFloat(dataCount)
     }
     
     func getColumnHeightAtIndex(columnIndex columnIndex:Int) -> CGFloat {
         let columnPosition = getOriginPositionOfColumn(columnIndex)
-        return self.bounds.height - columnPosition.y - margin - columnKeyLabelsMaxHeight - distanceBetweenHorizontalAxisAndKeyLabels
+        return self.bounds.height - columnPosition.y - margin.y - columnKeyLabelsMaxHeight - distanceBetweenHorizontalAxisAndKeyLabels
     }
     
     func getTheColumnValue(column column: Int) -> Int {
-        return data!.values.array[column]
+        let dataValues: [Int] = [Int](data!.values)
+        return dataValues[column]
     }
     
     func getTheTotalAmountOfData() -> Int {
@@ -774,15 +787,17 @@ class AxesChart: UIView {
     
     func createColumnKeyLabels() {
         let columnWidth = getColumnWidth()
-        for i in 0..<data!.keys.array.count {
+        let dataKeys: [String] = [String](data!.keys)
+        
+        for i in 0..<dataKeys.count {
             let columnPosition = getOriginPositionOfColumn(i)
             let posX = columnPosition.x
-            let posY = self.bounds.height - margin
+            let posY = self.bounds.height - margin.y
             let label:UILabel = UILabel(frame: CGRectMake(posX, posY, columnWidth, CGFloat.max))
             label.numberOfLines = 0
             label.lineBreakMode = NSLineBreakMode.ByWordWrapping
             label.font = UIFont(name: "Helvetica", size: 11)
-            label.text = data!.keys.array[i]
+            label.text = dataKeys[i]
             label.textAlignment = .Center
             label.sizeToFit()
             label.center = CGPoint(x: posX + columnWidth/2, y: label.frame.origin.y + label.frame.height/2)
@@ -802,7 +817,7 @@ class AxesChart: UIView {
     
     func setPositionAgainAndAddColumnKeyLabelsToView() {
         for label in columnKeyLabels {
-            label.frame.origin = CGPoint(x: label.frame.origin.x, y: self.bounds.height - margin - columnKeyLabelsMaxHeight + distanceBetweenHorizontalAxisAndKeyLabels)
+            label.frame.origin = CGPoint(x: label.frame.origin.x, y: self.bounds.height - margin.y - columnKeyLabelsMaxHeight + distanceBetweenHorizontalAxisAndKeyLabels)
             self.addSubview(label)
         }
     }
@@ -811,8 +826,9 @@ class AxesChart: UIView {
         let columnPosition = getOriginPositionOfColumn(index)
         let columnHeight = getColumnHeightAtIndex(columnIndex: index)
         let labelOriginPoint = CGPoint(x: columnPosition.x, y: columnPosition.y + columnHeight/2)
+        let dataValues: [Int] = [Int](data!.values)
         
-        let text = String(data!.values.array[index])
+        let text = String(dataValues[index])
         let myText: NSString = text as NSString
         let textSize: CGSize = myText.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(14)])
         
@@ -828,8 +844,8 @@ class AxesChart: UIView {
     func addCircleForRootPointOfAxes() {
         let rootCircleWidth: CGFloat = 6
         let rootCircleHeight: CGFloat = 6
-        let rootCircleX = margin - rootCircleWidth/2
-        let rootCircleY = self.bounds.height - margin - columnKeyLabelsMaxHeight - rootCircleHeight/2
+        let rootCircleX = margin.x - rootCircleWidth/2
+        let rootCircleY = self.bounds.height - margin.y - columnKeyLabelsMaxHeight - rootCircleHeight/2
         
         let rootCirclePath = UIBezierPath(ovalInRect: CGRect(x: rootCircleX, y: rootCircleY, width: rootCircleWidth, height: rootCircleHeight))
         axesColor.setFill()

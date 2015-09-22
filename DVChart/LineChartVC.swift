@@ -25,7 +25,7 @@ class LineChartVC: UIViewController {
     let deviceWidth = UIScreen.mainScreen().bounds.size.width
     let deviceHeight = UIScreen.mainScreen().bounds.size.height
     
-    let margin: CGFloat = 20
+    let margin: CGFloat = 5
 
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
